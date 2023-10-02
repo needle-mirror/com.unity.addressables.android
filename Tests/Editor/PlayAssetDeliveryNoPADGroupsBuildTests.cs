@@ -23,12 +23,12 @@ public class PlayAssetDeliveryNoPADGroupsBuildTests : PlayAssetDeliveryAndroidBu
     [Test]
     public void CanBuildPlayAssetDeliveryThenAabOrGradleProject([Values(false, true)] bool oneStep, [Values(false, true)] bool exportProject)
     {
-        BuildPlayAssetDeliveryAndGradleProject(oneStep, true, true, exportProject, kSingleFormat, kSingleFormatPostfix, false);
+        BuildPlayAssetDeliveryAndGradleProject(oneStep, true, true, exportProject, kSingleFormat, kSingleFormatPostfix);
     }
 
     [Test]
     public void CanBuildPlayAssetDeliveryThenAabOrGradleProjectWithTCFT([Values(false, true)] bool oneStep, [Values(false, true)] bool exportProject)
     {
-        BuildPlayAssetDeliveryAndGradleProject(oneStep, true, true, exportProject, kMultiFormats, kMultiFormatPostfixes, false);
+        BuildPlayAssetDeliveryAndGradleProject(oneStep, true, true, exportProject, kMultiFormats, kMultiFormatPostfixes);
     }
 }

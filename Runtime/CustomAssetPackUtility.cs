@@ -57,6 +57,7 @@ namespace UnityEngine.AddressableAssets.Android
         internal static readonly string[] InstallTimeFilesMasks =
         {
             "*unitybuiltinshaders*.bundle",
+            "*unitybuiltinassets*.bundle",
             "*monoscripts*.bundle",
             "settings.json",
             "catalog.json",

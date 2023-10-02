@@ -129,7 +129,7 @@ public abstract class PlayAssetDeliveryTestsBase
         Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith($"second_{TextureName(group)}".ToLower())));
     }
 
-    protected void ValidateGroupsInBuildFilder(string buildPath)
+    protected void ValidateGroupsInBuildFolder(string buildPath)
     {
         if (TotalNumberOfGroups == 0)
         {
@@ -147,24 +147,22 @@ public abstract class PlayAssetDeliveryTestsBase
                 ValidateSeparateAssets(buildPath, i);
             }
         }
-        Assert.AreEqual(NumberOfGroups > 0, Array.Exists(bundleFiles, p => Path.GetFileName(p).IndexOf("unitybuiltinshaders") >= 0));
+        // this can be _unitybuiltinassets or _unitybuiltinshaders files, depending on addressables package version
+        Assert.AreEqual(NumberOfGroups > 0, Array.Exists(bundleFiles, p => Path.GetFileName(p).IndexOf("unitybuiltin") >= 0));
     }
 
     void ValidateCatalog(string path, bool checkProvider, bool padProvider = false)
     {
-        var settings = AddressableAssetSettingsDefaultObject.Settings;
-        if (settings.BundleLocalCatalog)
+        Assert.IsTrue(
+            File.Exists(Path.Combine(path, "catalog.bin")) ||
+            File.Exists(Path.Combine(path, "catalog.json")) ||
+            File.Exists(Path.Combine(path, "catalog.bundle")),
+            "Catalog file is missing");
+        // checking for provider only inside json file
+        if (checkProvider && File.Exists(Path.Combine(path, "catalog.json")))
         {
-            Assert.IsTrue(File.Exists(Path.Combine(path, "catalog.bundle")));
-        }
-        else
-        {
-            Assert.IsTrue(File.Exists(Path.Combine(path, "catalog.json")));
-            if (checkProvider)
-            {
-                var catalogFile = File.ReadAllText(Path.Combine(path, "catalog.json"));
-                Assert.AreEqual(catalogFile.IndexOf("PlayAssetDeliveryAssetBundleProvider") >= 0, padProvider);
-            }
+            var catalogFile = File.ReadAllText(Path.Combine(path, "catalog.json"));
+            Assert.AreEqual(catalogFile.IndexOf("PlayAssetDeliveryAssetBundleProvider") >= 0, padProvider);
         }
     }
 
@@ -174,7 +172,7 @@ public abstract class PlayAssetDeliveryTestsBase
         ValidateCatalog(Addressables.BuildPath, true, false);
         Assert.IsTrue(File.Exists(Path.Combine(Addressables.BuildPath, "settings.json")));
         Assert.IsTrue(File.Exists(Path.Combine(Addressables.BuildPath, "AddressablesLink", "link.xml")));
-        ValidateGroupsInBuildFilder(Path.Combine(Addressables.BuildPath, platform));
+        ValidateGroupsInBuildFolder(Path.Combine(Addressables.BuildPath, platform));
     }
 
     protected void ValidateBuildFolderWithTCFT(string[] postfixes)
@@ -195,7 +193,7 @@ public abstract class PlayAssetDeliveryTestsBase
             var padProvider = AddressableAssetSettingsDefaultObject.Settings.groups.FindIndex(g => g.HasSchema<PlayAssetDeliverySchema>()) != -1;
             ValidateCatalog(pathWithPostfix, true, padProvider);
             Assert.IsTrue(File.Exists(Path.Combine(pathWithPostfix, "settings.json")));
-            ValidateGroupsInBuildFilder(Path.Combine(pathWithPostfix, "Android"));
+            ValidateGroupsInBuildFolder(Path.Combine(pathWithPostfix, "Android"));
         }
         Assert.IsTrue(File.Exists(Path.Combine(CustomAssetPackUtility.BuildRootDirectory, "AddressablesLink", "link.xml")));
     }
@@ -256,7 +254,8 @@ public abstract class PlayAssetDeliveryTestsBase
             if (NumberOfGroups > 0)
             {
                 var bundleFiles = Directory.GetFiles(Path.Combine(jsonFilesPath, "Android"));
-                Assert.IsTrue(Array.Exists(bundleFiles, p => Path.GetFileName(p).IndexOf("unitybuiltinshaders") >= 0));
+                // this can be _unitybuiltinassets or _unitybuiltinshaders files, depending on addressables package version
+                Assert.IsTrue(Array.Exists(bundleFiles, p => Path.GetFileName(p).IndexOf("unitybuiltin") >= 0));
             }
         }
     }
@@ -290,7 +289,8 @@ public abstract class PlayAssetDeliveryTestsBase
                 ValidateSeparateAssets(Path.Combine(aaPath, "Android"), i);
             }
         }
-        Assert.AreEqual(NumberOfGroups > 0, Array.Exists(bundleFiles, p => Path.GetFileName(p).IndexOf("unitybuiltinshaders") >= 0));
+        // this can be _unitybuiltinassets or _unitybuiltinshaders files, depending on addressables package version
+        Assert.AreEqual(NumberOfGroups > 0, Array.Exists(bundleFiles, p => Path.GetFileName(p).IndexOf("unitybuiltin") >= 0));
     }
 
     protected void ModifyGroupsBeforeBuild()
@@ -356,7 +356,7 @@ public abstract class PlayAssetDeliveryTestsBase
             assetPackSchema.AssetPackDeliveryType = GenerateDeliveryType(i);
             if (i == 0)
             {
-                // adding prefab object so unitybuiltinshaders bundle can be generated
+                // adding prefab object so unitybuiltinshaders/assets bundle can be generated
                 var a = CreateAsset(Path.Combine(kSingleTestAssetFolder, "prefabWithMaterial.prefab"), "cube");
                 settings.CreateOrMoveEntry(a, group, false, false);
             }

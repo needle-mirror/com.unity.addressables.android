@@ -55,11 +55,14 @@ public class PlayAssetDeliveryBuildWindowsTests : PlayAssetDeliveryBuildTestsBas
     void ValidatePlayer()
     {
         var addressablesPath = Path.Combine(kWindowsPlayerFolder, $"{kWindowsPlayerExe}_Data", "StreamingAssets", Addressables.StreamingAssetsSubFolder);
-        Assert.IsTrue(File.Exists(Path.Combine(addressablesPath, "catalog.json")));
-        var catalogFile = File.ReadAllText(Path.Combine(addressablesPath, "catalog.json"));
+        Assert.IsTrue(
+            File.Exists(Path.Combine(addressablesPath, "catalog.bin")) ||
+            File.Exists(Path.Combine(addressablesPath, "catalog.json")) ||
+            File.Exists(Path.Combine(addressablesPath, "catalog.bundle")),
+            "Catalog file is missing");
         Assert.IsTrue(File.Exists(Path.Combine(addressablesPath, "settings.json")));
         Assert.IsTrue(File.Exists(Path.Combine(addressablesPath, "AddressablesLink", "link.xml")));
-        ValidateGroupsInBuildFilder(Path.Combine(addressablesPath, kPlatformName));
+        ValidateGroupsInBuildFolder(Path.Combine(addressablesPath, kPlatformName));
     }
 
     [Test]

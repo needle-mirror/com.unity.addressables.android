@@ -40,7 +40,7 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
     {
 #if UNITY_EDITOR
         // Android specific build settings, other platforms are not affected
-        PlayerSettings.Android.textureCompressionFormats = new [] { TextureCompressionFormat.ETC2, TextureCompressionFormat.ASTC };
+        PlayerSettings.Android.textureCompressionFormats = new[] { TextureCompressionFormat.ETC2, TextureCompressionFormat.ASTC };
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
         PlayerSettings.Android.splitApplicationBinary = true;
         EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
@@ -51,11 +51,12 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
 
         var group = settings.CreateGroup(kRemoteGroupName, true, false, false, null, typeof(BundledAssetGroupSchema));
         var spriteEntry = settings.CreateOrMoveEntry(CreateTexture(Path.Combine(kSingleTestAssetFolder, kRemoteTexture)), group, false, false);
-        var hostIP = Environment.GetEnvironmentVariable("BOKKEN_HOST_IP");
-        if (!string.IsNullOrEmpty(hostIP))
+
+        // To test Remote group behavior REMOTE_GROUP_ADDRESS should be set in Yamato script (BOKKEN_HOST_IP:Port), otherwise all groups will be local
+        var hostAddress = Environment.GetEnvironmentVariable("REMOTE_GROUP_ADDRESS");
+        if (!string.IsNullOrEmpty(hostAddress))
         {
-            // making this group Remote when testing on Yamato
-            settings.profileSettings.SetValue(settings.activeProfileId, AddressableAssetSettings.kRemoteLoadPath, $"http://{hostIP}:8000");
+            settings.profileSettings.SetValue(settings.activeProfileId, AddressableAssetSettings.kRemoteLoadPath, $"http://{hostAddress}");
             var schema = group.GetSchema<BundledAssetGroupSchema>();
             schema.BuildPath.SetVariableByName(group.Settings, AddressableAssetSettings.kRemoteBuildPath);
             schema.LoadPath.SetVariableByName(group.Settings, AddressableAssetSettings.kRemoteLoadPath);

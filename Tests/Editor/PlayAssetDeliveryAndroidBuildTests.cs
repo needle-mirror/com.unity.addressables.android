@@ -19,37 +19,25 @@ public class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuildT
     [Test]
     public void CanBuildPlayAssetDeliveryThenApkOrGradleProject([Values(false, true)] bool oneStep, [Values(false, true)] bool exportProject)
     {
-        BuildPlayAssetDeliveryAndGradleProject(oneStep, false, false, exportProject, kSingleFormat, kSingleFormatPostfix, false);
+        BuildPlayAssetDeliveryAndGradleProject(oneStep, false, false, exportProject, kSingleFormat, kSingleFormatPostfix);
     }
 
     [Test]
     public void CanBuildPlayAssetDeliveryThenApkOrGradleProjectWithTCFT([Values(false, true)] bool oneStep, [Values(false, true)] bool exportProject)
     {
-        BuildPlayAssetDeliveryAndGradleProject(oneStep, false, false, exportProject, kMultiFormats, kMultiFormatPostfixes, false);
+        BuildPlayAssetDeliveryAndGradleProject(oneStep, false, false, exportProject, kMultiFormats, kMultiFormatPostfixes);
     }
 
     [Test]
     public void CanBuildPlayAssetDeliveryThenAabOrGradleProject([Values(false, true)] bool oneStep, [Values(false, true)] bool splitAppBinary, [Values(false, true)] bool exportProject)
     {
-        BuildPlayAssetDeliveryAndGradleProject(oneStep, true, splitAppBinary, exportProject, kSingleFormat, kSingleFormatPostfix, false);
+        BuildPlayAssetDeliveryAndGradleProject(oneStep, true, splitAppBinary, exportProject, kSingleFormat, kSingleFormatPostfix);
     }
 
     [Test]
     public void CanBuildPlayAssetDeliveryThenAabOrGradleProjectWithTCFT([Values(false, true)] bool oneStep, [Values(false, true)] bool exportProject)
     {
-        BuildPlayAssetDeliveryAndGradleProject(oneStep, true, true, exportProject, kMultiFormats, kMultiFormatPostfixes, false);
-    }
-
-    [Test]
-    public void CanBuildPlayAssetDeliveryGradleProjectWithCompressedCatalog([Values(false, true)] bool splitAppBinary)
-    {
-        BuildPlayAssetDeliveryAndGradleProject(false, true, splitAppBinary, true, kSingleFormat, kSingleFormatPostfix, true);
-    }
-
-    [Test]
-    public void CanBuildPlayAssetDeliveryGradleProjectWithCompressedCatalogTCFT()
-    {
-        BuildPlayAssetDeliveryAndGradleProject(false, true, true, true, kMultiFormats, kMultiFormatPostfixes, true);
+        BuildPlayAssetDeliveryAndGradleProject(oneStep, true, true, exportProject, kMultiFormats, kMultiFormatPostfixes);
     }
 
     [Test]
@@ -64,7 +52,7 @@ public class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuildT
         // testing variant when default group is not PAD, and build path is set to remote
         settings.DefaultGroup = group;
 
-        BuildPlayAssetDeliveryAndGradleProject(false, true, true, true, kMultiFormats, kMultiFormatPostfixes, false);
+        BuildPlayAssetDeliveryAndGradleProject(false, true, true, true, kMultiFormats, kMultiFormatPostfixes);
 
         // default group must be restored after build
         Assert.AreEqual(settings.DefaultGroup, group);

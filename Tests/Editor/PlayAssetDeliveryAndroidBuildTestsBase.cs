@@ -34,7 +34,7 @@ public class PlayAssetDeliveryAndroidBuildTestsBase : PlayAssetDeliveryBuildTest
     }
 
     protected void BuildPlayAssetDeliveryAndGradleProject(bool oneStep, bool buildAppBundle, bool splitAppBinary, bool exportProject,
-        TextureCompressionFormat[] tcFormats, string[] tcPostfixes, bool compressedCatalog)
+        TextureCompressionFormat[] tcFormats, string[] tcPostfixes)
     {
         EditorUserBuildSettings.buildAppBundle = buildAppBundle;
         EditorUserBuildSettings.exportAsGoogleAndroidProject = exportProject;
@@ -42,7 +42,6 @@ public class PlayAssetDeliveryAndroidBuildTestsBase : PlayAssetDeliveryBuildTest
         PlayerSettings.Android.textureCompressionFormats = tcFormats;
         var useAssetPacks = buildAppBundle && (splitAppBinary || tcFormats.Length > 1);
         var settings = AddressableAssetSettingsDefaultObject.Settings;
-        settings.BundleLocalCatalog = compressedCatalog;
         if (!oneStep)
         {
             var builder = GetBuilderOfType(settings, typeof(BuildScriptPlayAssetDelivery));
