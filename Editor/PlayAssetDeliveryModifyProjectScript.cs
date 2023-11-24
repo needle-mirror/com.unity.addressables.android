@@ -1,6 +1,9 @@
 #if UNITY_ANDROID
+using System;
 using System.IO;
+using System.Text;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor.Android;
 using Unity.Android.Gradle;
 using UnityEngine;
@@ -77,6 +80,7 @@ namespace UnityEditor.AddressableAssets.Android
                 // gradle project must be modified only when using asset packs, play asset delivery is supported and addressables are generated for PAD,
                 // this should be done during the last (or the only) texture compression related iteration
                 projectFilesContext.SetData("UseAssetPacks", false);
+                PlayAssetDeliveryPostGenerateGradleAndroidProject.Reset();
                 return projectFilesContext;
             }
 
@@ -108,7 +112,25 @@ namespace UnityEditor.AddressableAssets.Android
                 CustomAssetPackUtility.CustomAssetPacksDataEditorPath
             };
 
+            PlayAssetDeliveryPostGenerateGradleAndroidProject.Setup(customPackData);
+
             return projectFilesContext;
+        }
+
+        internal static string GenerateAssetPacksGradleContents(string assetPackString, CustomAssetPackData customPackData)
+        {
+            var assetPacks = new StringBuilder();
+            foreach (var entry in customPackData.Entries)
+            {
+                var assetPackEntry = $"\":{entry.AssetPackName}\"";
+                if (assetPackString.IndexOf(assetPackEntry, StringComparison.InvariantCulture) == -1)
+                {
+                    assetPacks.Append(", ").Append(assetPackEntry);
+                }
+            }
+            // if assetPackString contains no asset packs, leading comma must be skipped
+            var start = assetPackString.Contains(':', StringComparison.InvariantCulture) || assetPacks.Length == 0 ? 0 : 2;
+            return assetPackString += assetPacks.ToString(start, assetPacks.Length - start);
         }
 
         /// <summary>
@@ -124,24 +146,121 @@ namespace UnityEditor.AddressableAssets.Android
 
             var customPackData = projectFiles.GetData<CustomAssetPackData>("AssetPacks");
 
-            var assetPackString = projectFiles.LauncherBuildGradle.Android.AssetPacks.GetRaw();
             foreach (var entry in customPackData.Entries)
             {
                 var buildGradle = new ModuleBuildGradleFile();
                 buildGradle.ApplyPluginList.AddPluginByName("com.android.asset-pack");
                 buildGradle.AddElement(new Block("assetPack", $"{{\n\tpackName = \"{entry.AssetPackName}\"\n\tdynamicDelivery {{\n\t\tdeliveryType = \"{CustomAssetPackUtility.DeliveryTypeToGradleString(entry.DeliveryType)}\"\n\t}}\n}}"));
                 projectFiles.SetBuildGradleFile(Path.Combine(entry.AssetPackName, "build.gradle"), buildGradle);
-                projectFiles.GradleSettings.IncludeList.AddPluginByName($":{entry.AssetPackName}");
-                if (string.IsNullOrEmpty(assetPackString))
+            }
+
+            if (!PlayAssetDeliveryPostGenerateGradleAndroidProject.UpdateSettingsGradle)
+            {
+                foreach (var entry in customPackData.Entries)
                 {
-                    assetPackString = $"\":{entry.AssetPackName}\"";
+                    projectFiles.GradleSettings.IncludeList.AddPluginByName($":{entry.AssetPackName}");
+                }
+            }
+
+            if (!PlayAssetDeliveryPostGenerateGradleAndroidProject.UpdateLauncherBuildGradle)
+            {
+                var assetPackString = projectFiles.LauncherBuildGradle.Android.AssetPacks.GetRaw() ?? "";
+                assetPackString = GenerateAssetPacksGradleContents(assetPackString, customPackData);
+                projectFiles.LauncherBuildGradle.Android.AssetPacks.SetRaw(assetPackString);
+            }
+        }
+    }
+
+    internal class PlayAssetDeliveryPostGenerateGradleAndroidProject : IPostGenerateGradleAndroidProject
+    {
+        internal const string kSettingsTemplateName = "settingsTemplate.gradle";
+        internal const string kLauncherGradleTemplateName = "launcherTemplate.gradle";
+        internal static string PluginsAndroidPath => Path.Combine("Assets", "Plugins", "Android");
+        internal static string SettingsTemplatePath => Path.Combine(PluginsAndroidPath, kSettingsTemplateName);
+        internal static string LauncherGradleTemplatePath => Path.Combine(PluginsAndroidPath, kLauncherGradleTemplateName);
+
+        internal static bool UpdateLauncherBuildGradle { get; private set; } = false;
+        internal static bool UpdateSettingsGradle { get; private set; } = false;
+        static CustomAssetPackData CustomPackData { get; set; } = null;
+
+        internal const string kAssetPacksMissing = "Asset packs entry (**PLAY_ASSET_PACKS**) is missing from Custom Launcher Gradle Template. Asset packs are not included to the AAB.";
+        string GradleFileMissingMsg(string path) => $"File {path} is missing from the generated project. Asset packs are not included to the AAB.";
+
+        static readonly Regex s_AssetPacksContent = new Regex(@"(?<begin>^.*assetPacks\s*=\s*\[\s*)(?<assetPacks>.*)(?<end>\s*\].*$)", RegexOptions.Compiled | RegexOptions.Singleline);
+
+        public int callbackOrder => 0;
+
+        internal static void Reset()
+        {
+            CustomPackData = null;
+            UpdateLauncherBuildGradle = false;
+            UpdateSettingsGradle = false;
+        }
+
+        internal static void Setup(CustomAssetPackData customPackData)
+        {
+            CustomPackData = customPackData;
+            UpdateLauncherBuildGradle = File.Exists(LauncherGradleTemplatePath);
+            UpdateSettingsGradle = File.Exists(SettingsTemplatePath);
+        }
+
+        public void OnPostGenerateGradleAndroidProject(string projectPath)
+        {
+            if (CustomPackData == null)
+            {
+                return;
+            }
+
+            if (UpdateSettingsGradle)
+            {
+                var settingsGradlePath = Path.Combine(projectPath, "..", "settings.gradle");
+                if (!File.Exists(settingsGradlePath))
+                {
+                    // throwing exception from here doesn't break build process, so just adding error to the Editor log
+                    Debug.LogError(GradleFileMissingMsg(settingsGradlePath));
                 }
                 else
                 {
-                    assetPackString += $", \":{entry.AssetPackName}\"";
+                    var settingsContent = File.ReadAllText(settingsGradlePath);
+                    var includeAssetPacks = new StringBuilder();
+                    foreach (var entry in CustomPackData.Entries)
+                    {
+                        var assetPackEntry = $"\':{entry.AssetPackName}\'";
+                        if (!settingsContent.Contains(assetPackEntry, StringComparison.InvariantCulture))
+                        {
+                            includeAssetPacks.Append("\ninclude ").Append(assetPackEntry);
+                        }
+                    }
+                    if (includeAssetPacks.Length > 0)
+                    {
+                        settingsContent += includeAssetPacks.ToString();
+                        File.WriteAllText(settingsGradlePath, settingsContent);
+                    }
                 }
             }
-            projectFiles.LauncherBuildGradle.Android.AssetPacks.SetRaw(assetPackString);
+
+            if (UpdateLauncherBuildGradle)
+            {
+                var launcherGradlePath = Path.Combine(projectPath, "..", "launcher", "build.gradle");
+                if (!File.Exists(launcherGradlePath))
+                {
+                    // throwing exception from here doesn't break build process, so just adding error to the Editor log
+                    Debug.LogError(GradleFileMissingMsg(launcherGradlePath));
+                    return;
+                }
+                var launcherBuildContent = File.ReadAllText(launcherGradlePath);
+                var match = s_AssetPacksContent.Match(launcherBuildContent);
+                if (!match.Success)
+                {
+                    // throwing exception from here doesn't break build process, so just adding error to the Editor log
+                    Debug.LogError(kAssetPacksMissing);
+                    return;
+                }
+                var assetPackString = match.Groups["assetPacks"].Value;
+                assetPackString = PlayAssetDeliveryModifyProjectScript.GenerateAssetPacksGradleContents(assetPackString, CustomPackData);
+                launcherBuildContent = match.Groups["begin"].Value + assetPackString + match.Groups["end"].Value;
+                File.WriteAllText(launcherGradlePath, launcherBuildContent);
+            }
         }
     }
 }
