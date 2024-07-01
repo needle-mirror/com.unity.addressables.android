@@ -29,6 +29,7 @@ public class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuildT
     }
 
     [Test]
+    [Timeout(300000)]
     public void CanBuildPlayAssetDeliveryThenAabOrGradleProject([Values(false, true)] bool oneStep, [Values(false, true)] bool splitAppBinary, [Values(false, true)] bool exportProject)
     {
         BuildPlayAssetDeliveryAndGradleProject(oneStep, true, splitAppBinary, exportProject, kSingleFormat, kSingleFormatPostfix);
