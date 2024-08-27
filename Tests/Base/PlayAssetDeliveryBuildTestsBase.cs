@@ -4,7 +4,7 @@ using UnityEditor;
 #endif
 using UnityEngine.AddressableAssets.Android;
 
-public abstract class PlayAssetDeliveryBuildTestsBase : PlayAssetDeliveryTestsBase
+internal abstract class PlayAssetDeliveryBuildTestsBase : PlayAssetDeliveryTestsBase
 {
     protected override int NumberOfGroups => 5;
     protected override int NumberOfUnitedGroups => 3;

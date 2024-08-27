@@ -5,7 +5,7 @@ using UnityEditor.TestTools;
 using UnityEngine.AddressableAssets.Android;
 
 [RequirePlatformSupport(BuildTarget.Android)]
-public class PlayAssetDeliveryNoInstallTimePacksBuildTests : PlayAssetDeliveryAndroidBuildTestsBase
+internal class PlayAssetDeliveryNoInstallTimePacksBuildTests : PlayAssetDeliveryAndroidBuildTestsBase
 {
     protected override int NumberOfGroups => 2;
     protected override int NumberOfUnitedGroups => 0;

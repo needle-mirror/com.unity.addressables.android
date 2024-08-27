@@ -14,7 +14,7 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-public abstract class PlayAssetDeliveryTestsBase
+internal abstract class PlayAssetDeliveryTestsBase
 {
     protected const string kCustomAssetPackName = "TestPack";
     protected const string kWrongCustomAssetPackName = "NotExistingTestPack";
@@ -74,7 +74,7 @@ public abstract class PlayAssetDeliveryTestsBase
         throw new Exception("DataBuilder not found");
     }
 
-    public static void DeleteDirectoryFromAssets(string dir)
+    internal static void DeleteDirectoryFromAssets(string dir)
     {
         if (!Directory.Exists(dir))
         {
@@ -332,7 +332,8 @@ public abstract class PlayAssetDeliveryTestsBase
             // already initialized
             return;
         }
-        AssetDatabase.CreateFolder("Assets", kTestFolder);
+        var testFolder = AssetDatabase.CreateFolder("Assets", kTestFolder);
+        var emptyFolder = AssetDatabase.CreateFolder($"Assets/{kTestFolder}", "EmptyFolder");
         AddressableAssetSettingsDefaultObject.Settings =
             AddressableAssetSettings.Create(AddressableAssetSettingsDefaultObject.kDefaultConfigFolder,
             AddressableAssetSettingsDefaultObject.kDefaultConfigAssetName, true, true);
@@ -380,6 +381,10 @@ public abstract class PlayAssetDeliveryTestsBase
             assetPackSchema.IncludeInCustomAssetPack = true;
             assetPackSchema.CustomAssetPackName = CustomAssetPackName(index);
         }
+
+        //add empty folder to a group te ensure that the build does not fail
+        var emptyFolderEntry = settings.CreateOrMoveEntry(emptyFolder, settings.groups[0]);
+        Assert.NotNull(emptyFolderEntry);
     }
 
     protected void CleanupAddressables()

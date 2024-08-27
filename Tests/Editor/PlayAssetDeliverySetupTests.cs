@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 [RequirePlatformSupport(BuildTarget.Android)]
-public class PlayAssetDeliverySetupTests
+internal class PlayAssetDeliverySetupTests
 {
     [Test]
     public void InitPlayAssetDeliveryWhenAddressablesNotInitializedFailed()

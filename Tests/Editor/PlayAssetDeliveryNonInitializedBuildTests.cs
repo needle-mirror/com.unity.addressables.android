@@ -16,7 +16,7 @@ using UnityEngine.AddressableAssets.Android;
 using UnityEngine.TestTools;
 
 [RequirePlatformSupport(BuildTarget.Android)]
-public class PlayAssetDeliveryNonInitializedBuildTests : PlayAssetDeliveryAndroidBuildTestsBase
+internal class PlayAssetDeliveryNonInitializedBuildTests : PlayAssetDeliveryAndroidBuildTestsBase
 {
     protected void BuildAddressablesAndGradleProject(bool oneStep, bool buildAppBundle, bool splitAppBinary, bool exportProject)
     {

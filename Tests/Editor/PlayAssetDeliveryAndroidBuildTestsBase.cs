@@ -12,7 +12,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 [RequirePlatformSupport(BuildTarget.Android)]
-public class PlayAssetDeliveryAndroidBuildTestsBase : PlayAssetDeliveryBuildTestsBase
+internal class PlayAssetDeliveryAndroidBuildTestsBase : PlayAssetDeliveryBuildTestsBase
 {
     [OneTimeSetUp]
     public void InitAndroidBuild()

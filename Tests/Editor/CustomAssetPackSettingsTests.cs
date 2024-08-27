@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 [RequirePlatformSupport(BuildTarget.Android)]
-public class CustomAssetPackSettingsTests
+internal class CustomAssetPackSettingsTests
 {
     const string kAssetPackName = "CustomAssetPack";
     const string kNewAssetPackName = "NewCustomAssetPack";

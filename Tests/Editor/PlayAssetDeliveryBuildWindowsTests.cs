@@ -15,7 +15,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.TestTools;
 
 [RequirePlatformSupport(BuildTarget.StandaloneWindows64)]
-public class PlayAssetDeliveryBuildWindowsTests : PlayAssetDeliveryBuildTestsBase
+internal class PlayAssetDeliveryBuildWindowsTests : PlayAssetDeliveryBuildTestsBase
 {
     const string kWindowsPlayerFolder = "WindowsTest";
     const string kWindowsPlayerExe = "test";

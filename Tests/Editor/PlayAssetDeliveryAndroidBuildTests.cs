@@ -14,7 +14,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.TestTools;
 
 [RequirePlatformSupport(BuildTarget.Android)]
-public class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuildTestsBase
+internal class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuildTestsBase
 {
     [Test]
     public void CanBuildPlayAssetDeliveryThenApkOrGradleProject([Values(false, true)] bool oneStep, [Values(false, true)] bool exportProject)

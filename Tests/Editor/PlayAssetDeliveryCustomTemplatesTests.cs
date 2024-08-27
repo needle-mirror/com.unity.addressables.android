@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 [RequirePlatformSupport(BuildTarget.Android)]
-public class PlayAssetDeliveryCustomTemplatesTests : PlayAssetDeliveryAndroidBuildTestsBase
+internal class PlayAssetDeliveryCustomTemplatesTests : PlayAssetDeliveryAndroidBuildTestsBase
 {
     static string InternalTemplateDirectory => Path.Combine(BuildPipeline.GetPlaybackEngineDirectory(BuildTarget.Android, BuildOptions.None), "Tools", "GradleTemplates");
 

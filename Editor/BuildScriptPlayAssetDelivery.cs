@@ -504,7 +504,7 @@ namespace UnityEditor.AddressableAssets.Android
         {
             foreach (var entry in group.entries)
             {
-                if (bundleIdToEditorDataEntry.ContainsKey(entry.BundleFileId))
+                if (entry.BundleFileId == null || bundleIdToEditorDataEntry.ContainsKey(entry.BundleFileId))
                 {
                     continue;
                 }

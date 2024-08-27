@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 [RequirePlatformSupport(BuildTarget.Android)]
-public class PlayAssetDeliveryAssetPackNamesTests : PlayAssetDeliveryTestsBase
+internal class PlayAssetDeliveryAssetPackNamesTests : PlayAssetDeliveryTestsBase
 {
     protected override int NumberOfGroups => 7;
     protected override int NumberOfUnitedGroups => 3;

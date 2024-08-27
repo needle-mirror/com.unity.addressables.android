@@ -1,6 +1,0 @@
-{
-    "displayName": "Play Asset Delivery sample",
-    "description": "Contains complete set of assets to demonstrate usage of the Addressable Play Asset Delivery support. This sample is intended to be imported into empty Unity project which uses built-in render pipeline.",
-    "interactiveImport": true,
-    "createSeparatePackage": false
-}
