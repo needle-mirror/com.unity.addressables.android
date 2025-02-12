@@ -9,8 +9,14 @@
         "Unity.Addressables.Android.Editor",
         "Unity.Addressables.Android.Base.Tests"
     ],
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
     "optionalUnityReferences": [
         "TestAssemblies"
+    ],
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
     ],
     "includePlatforms": [],
     "excludePlatforms": []

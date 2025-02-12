@@ -6,8 +6,7 @@ uid: addressables-for-android-custom-asset-packs
 
 A custom asset pack can include more than one Addressable group. Using Custom Asset Pack Settings inspector, you can create, rename, change the Delivery Type, and delete the custom asset packs.
 
-![](images/customassetpacks.png)
-> Custom Asset Pack Settings
+![Custom Asset Pack settings](images/customassetpacks.png) <br/> _Custom Asset Pack settings_
 
 If you delete a custom asset pack while it is being used in Play Asset Delivery schema for some Addressable groups,
 * **Include In Custom Asset Pack** option in those groups automatically turns off.

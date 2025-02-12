@@ -12,4 +12,5 @@ uid: addressables-for-android-toc
     * [Edit Addressables groups for Play Asset Delivery](edit-groups-for-play-asset-delivery.md)
     * [Build Addressables content for Android](build-for-pad.md)
 * [Use Texture Compression Targeting support](texture-compression-targeting.md)
+* [Load Addressable assets from asset packs](load-addressable-assets.md)
 * [Manage asset packs at runtime](manage-asset-packs-at-runtime.md)

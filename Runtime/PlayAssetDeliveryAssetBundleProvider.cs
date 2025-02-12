@@ -11,6 +11,31 @@ using UnityEngine.ResourceManagement.Exceptions;
 
 namespace UnityEngine.AddressableAssets.Android
 {
+#if UNITY_ANDROID && !UNITY_EDITOR
+    // this class is required to generate error when trying loading synchronously
+    class PlayAssetDeliveryResource
+    {
+        PlayAssetDeliveryAssetBundleProvider m_PlayAssetDeliveryAssetBundleProvider;
+        ProvideHandle m_ProvideHandle;
+        const string kSyncMessage = "Play Asset Delivery provider does not support synchronous Addressable loading. Please do not use WaitForCompletion with Play Asset Delivery provider.";
+
+        internal PlayAssetDeliveryResource(PlayAssetDeliveryAssetBundleProvider provider, ProvideHandle provideHandle)
+        {
+            m_PlayAssetDeliveryAssetBundleProvider = provider;
+            m_ProvideHandle = provideHandle;
+            m_ProvideHandle.SetWaitForCompletionCallback(WaitForCompletionHandler);
+        }
+
+        bool WaitForCompletionHandler()
+        {
+            Debug.LogError(kSyncMessage);
+            m_PlayAssetDeliveryAssetBundleProvider.CompleteInterface(m_ProvideHandle);
+            m_ProvideHandle.Complete<AssetBundleResource>(null, false, new RemoteProviderException(kSyncMessage));
+            return true;
+        }
+    }
+#endif
+
     /// <summary>
     /// Ensures that the asset pack containing the AssetBundle is installed/downloaded before attemping to load the bundle.
     /// </summary>
@@ -29,6 +54,13 @@ namespace UnityEngine.AddressableAssets.Android
 
         void LoadFromAssetPack(ProvideHandle providerInterface)
         {
+            if (!PlayAssetDeliveryRuntimeData.Instance.Initialized)
+            {
+                // this can happen only when trying to load first asset using Play Asset Delivery synchronously
+                new PlayAssetDeliveryResource(this, providerInterface);
+                return;
+            }
+
             string bundleName = Path.GetFileNameWithoutExtension(providerInterface.Location.InternalId.Replace("\\", "/"));
             if (!PlayAssetDeliveryRuntimeData.Instance.BundleNameToAssetPack.ContainsKey(bundleName))
             {
@@ -58,6 +90,7 @@ namespace UnityEngine.AddressableAssets.Android
                 assetPackNameToDownloadPath.Remove(assetPackName);
             }
             // Download the asset pack
+            new PlayAssetDeliveryResource(this, providerInterface);
             DownloadRemoteAssetPack(providerInterface, assetPackName);
         }
 
@@ -70,7 +103,7 @@ namespace UnityEngine.AddressableAssets.Android
 
         internal override IOperationCacheKey CreateCacheKeyForLocation(ResourceManager rm, IResourceLocation location, Type desiredType)
         {
-            return new IdCacheKey(location.InternalId);
+            return new IdCacheKey(location.GetType(), location.InternalId);
         }
 
         void DownloadRemoteAssetPack(ProvideHandle providerInterface, string assetPackName)
@@ -95,7 +128,7 @@ namespace UnityEngine.AddressableAssets.Android
                 m_ProviderInterfaces.Remove(assetPackName);
                 var message = $"Cannot retrieve state for asset pack '{assetPackName}'. This might be because PlayCore Plugin is not installed: {ioe.Message}";
                 Debug.LogError(message);
-                providerInterface.Complete(this, false, new RemoteProviderException(message));
+                providerInterface.Complete<AssetBundleResource>(null, false, new RemoteProviderException(message));
             }
         }
 
@@ -123,11 +156,14 @@ namespace UnityEngine.AddressableAssets.Android
                         {
                             // Asset pack was located on device. Proceed with loading the bundle.
                             PlayAssetDeliveryRuntimeData.Instance.AssetPackNameToDownloadPath.Add(info.name, assetPackPath);
-                            foreach (var pi in m_ProviderInterfaces[info.name])
+                            if (m_ProviderInterfaces.ContainsKey(info.name))
                             {
-                                base.Provide(pi);
+                                foreach (var pi in m_ProviderInterfaces[info.name])
+                                {
+                                    base.Provide(pi);
+                                }
+                                m_ProviderInterfaces.Remove(info.name);
                             }
-                            m_ProviderInterfaces.Remove(info.name);
                         }
                         else
                         {
@@ -142,7 +178,7 @@ namespace UnityEngine.AddressableAssets.Android
                 Debug.LogError(message);
                 foreach (var pi in m_ProviderInterfaces[info.name])
                 {
-                    pi.Complete(this, false, new RemoteProviderException(message));
+                    pi.Complete<AssetBundleResource>(null, false, new RemoteProviderException(message));
                 }
                 m_ProviderInterfaces.Remove(info.name);
             }
@@ -169,10 +205,25 @@ namespace UnityEngine.AddressableAssets.Android
                 {
                     foreach (var pi in p.Value)
                     {
-                        pi.Complete(this, false, new RemoteProviderException(message));
+                        pi.Complete<AssetBundleResource>(null, false, new RemoteProviderException(message));
                     }
                 }
                 m_ProviderInterfaces.Clear();
+            }
+        }
+
+        internal void CompleteInterface(ProvideHandle handle)
+        {
+            foreach (var p in m_ProviderInterfaces)
+            {
+                if (p.Value.Remove(handle))
+                {
+                    if (p.Value.Count == 0)
+                    {
+                        m_ProviderInterfaces.Remove(p.Key);
+                    }
+                    return;
+                }
             }
         }
 #else

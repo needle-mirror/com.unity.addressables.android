@@ -15,11 +15,11 @@ You can build Addressables content with the Player build or you can build it sep
 
 To build Addressables content, open the **Addressables Groups** window and go to **Build > New Build**. Then select **Play Asset Delivery** to run the **Play Asset Delivery** Addressables build script.
 
-![](images/build-playassetdelivery.png)
+![Play Asset Delivery](images/build-playassetdelivery.png) <br/>_Play Asset Delivery_
 
 After building Addressables content, you can build the Player.
 
-Unity generates Android asset packs when [Android App Bundle](https://docs.unity3d.com/2023.2/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android Build settings, and either the [Split Application Binary](https://docs.unity3d.com/Manual/class-PlayerSettingsAndroid.html#splitapplicationbinary) property or the [Texture Compression Targeting](https://docs.unity3d.com/2023.2/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting) is enabled in the Android Player settings.
+Unity generates Android asset packs when [Android App Bundle](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android Build settings, and either the [Split Application Binary](https://docs.unity3d.com/Manual/class-PlayerSettingsAndroid.html#splitapplicationbinary) property or the [Texture Compression Targeting](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting) is enabled in the Android Player settings.
 
 Otherwise, built Addressables content is included in the [Streaming Assets](https://docs.unity3d.com/Manual/StreamingAssets.html).
 

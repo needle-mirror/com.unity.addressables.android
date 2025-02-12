@@ -11,7 +11,7 @@ namespace UnityEditor.AddressableAssets.Android
         internal const string kInitPlayAssetDeliveryMenuItem = "Window/Asset Management/Addressables/Init Play Asset Delivery";
         internal const string kAssetPackContentTemplateName = "Play Asset Delivery Assets";
 
-        internal const int kMaxAssetPacksNumber = 50;
+        internal const int kMaxAssetPacksNumber = 100;
         internal static string kTooManyAssetPacksMessage => $"The total number of asset packs in your App Bundle will be more than {kMaxAssetPacksNumber}. Google Play store accepts apps with up to {kMaxAssetPacksNumber} asset packs.\nConsider making some Addressables groups \"install-time\" or combining them into custom asset packs.";
 
         // required for auto-testing

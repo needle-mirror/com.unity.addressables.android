@@ -387,9 +387,12 @@ internal abstract class PlayAssetDeliveryTestsBase
         Assert.NotNull(emptyFolderEntry);
     }
 
-    protected void CleanupAddressables()
+    protected void CleanupAddressables(bool deleteServerData)
     {
-        DeleteDirectoryFromAssets("ServerData");
+        if (deleteServerData)
+        {
+            DeleteDirectoryFromAssets("ServerData");
+        }
         DeleteDirectoryFromAssets(Path.Combine("Assets", kTestFolder));
         DeleteDirectoryFromAssets(CustomAssetPackUtility.RootDirectory);
         DeleteDirectoryFromAssets(AddressableAssetSettingsDefaultObject.kDefaultConfigFolder);
@@ -417,7 +420,7 @@ internal abstract class PlayAssetDeliveryTestsBase
     [TearDown]
     public void CleanupEditorTests()
     {
-        CleanupAddressables();
+        CleanupAddressables(true);
     }
 #endif
 }

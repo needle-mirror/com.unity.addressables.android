@@ -121,7 +121,7 @@ namespace UnityEditor.AddressableAssets.Android
         /// <summary>
         /// Invoked before performing a Player build.
         /// Restores active player data builder after building Addressables for Play Asset Delivery.
-        /// Checks that addressables hve been built for Play Asset Delivery for all texture compressions.
+        /// Checks that addressables have been built for Play Asset Delivery for all texture compressions.
         /// Moves asset bundles (including texture compression targeted) which are not assigned to any asset pack to the Streaming Assets.
         /// </summary>
         /// <param name="buildPlayerContext">Contains data related to the player.</param>

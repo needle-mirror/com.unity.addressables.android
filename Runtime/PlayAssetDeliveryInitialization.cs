@@ -76,6 +76,7 @@ namespace UnityEngine.AddressableAssets.Android
             {
                 Debug.LogWarning($"{warningMsg} Default internal id locations will be used instead.");
             }
+            PlayAssetDeliveryRuntimeData.Instance.Initialized = true;
             Complete(true, true, "");
             m_IsDone = true;
         }

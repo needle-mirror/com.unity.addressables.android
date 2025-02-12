@@ -38,6 +38,11 @@ namespace UnityEngine.AddressableAssets.Android
         internal Dictionary<string, string> AssetPackNameToDownloadPath => m_AssetPackNameToDownloadPath;
 
         /// <summary>
+        /// Are asset packs and asset bundles data initialized.
+        /// </summary>
+        internal bool Initialized { get; set; } = false;
+
+        /// <summary>
         /// Creates a new PlayAssetDeliveryRuntimeData object.
         /// </summary>
         internal PlayAssetDeliveryRuntimeData()

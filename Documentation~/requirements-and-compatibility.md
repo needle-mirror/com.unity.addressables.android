@@ -12,7 +12,7 @@ The Addressables for Android package supports Unity 2023.2 and above, and requir
 
 **Supporting package requirements**
 
-The Addressables for Android package requires Addressables package 1.21.17 or above.
+The Addressables for Android package requires Addressables package version 2.3.7 or newer.
 
 >[!Note]
 > Addressables package is automatically installed along with Addressables for Android package, in case you do not install Addressables package beforehand.

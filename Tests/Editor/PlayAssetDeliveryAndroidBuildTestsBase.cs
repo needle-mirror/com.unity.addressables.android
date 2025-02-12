@@ -18,6 +18,7 @@ internal class PlayAssetDeliveryAndroidBuildTestsBase : PlayAssetDeliveryBuildTe
     public void InitAndroidBuild()
     {
         EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+        PlayerSettings.SetIl2CppCodeGeneration(UnityEditor.Build.NamedBuildTarget.Android, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
     }
 
     protected BuildPlayerOptions CreateSceneAndBuildPlayerOptions()

@@ -255,9 +255,9 @@ namespace UnityEditor.AddressableAssets.Android
             {
                 newName = baseName + counter;
                 counter++;
-                if (counter == 50)
+                if (counter == PlayAssetDeliverySetup.kMaxAssetPacksNumber)
                 {
-                    // There can be up to 50 asset packs in an Android App Bundle
+                    // Exceeding max number of asset packs in an Android App Bundle
                     throw new OverflowException("Too many asset packs are created.");
                 }
             }

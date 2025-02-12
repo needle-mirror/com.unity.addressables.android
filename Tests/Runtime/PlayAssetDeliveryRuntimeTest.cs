@@ -6,8 +6,9 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.Android;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets.Android;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.Exceptions;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.AddressableAssets;
@@ -18,10 +19,13 @@ using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.AddressableAssets.Android;
 #endif
 
-class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildSetup
+class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildSetup, IPostBuildCleanup
 {
     const string kNonAddressableTexture = "NonAddressableTexture";
     const string kRemoteTexture = "RemoteTexture.png";
+    const string kSyncMessage = "Play Asset Delivery provider does not support synchronous Addressable loading. Please do not use WaitForCompletion with Play Asset Delivery provider.";
+    const string kStartLoadMessage = "Start sync loading";
+    const string kStopLoadMessage = "Stop sync loading";
 
 #if UNITY_ANDROID
 #if UNITY_EDITOR
@@ -43,12 +47,14 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
         PlayerSettings.Android.textureCompressionFormats = new[] { TextureCompressionFormat.ETC2, TextureCompressionFormat.ASTC };
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
         PlayerSettings.Android.splitApplicationBinary = true;
+        PlayerSettings.SetIl2CppCodeGeneration(UnityEditor.Build.NamedBuildTarget.Android, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
         EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
         EditorUserBuildSettings.buildAppBundle = true;
 
         InitAddressables();
         var settings = AddressableAssetSettingsDefaultObject.Settings;
 
+        // Create Remote group
         var group = settings.CreateGroup(kRemoteGroupName, true, false, false, null, typeof(BundledAssetGroupSchema));
         var spriteEntry = settings.CreateOrMoveEntry(CreateTexture(Path.Combine(kSingleTestAssetFolder, kRemoteTexture)), group, false, false);
 
@@ -68,12 +74,27 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
         CreateTexture(Path.Combine(kSingleTestAssetFolder, "Resources", $"{kNonAddressableTexture}.png"));
 
         settings.BuildAddressablesWithPlayerBuild = AddressableAssetSettings.PlayerBuildOption.DoNotBuildWithPlayer;
-        var builder = GetBuilderOfType(settings, typeof(BuildScriptPlayAssetDelivery));
         var builderInput = new AddressablesDataBuilderInput(settings);
-        var result = builder.BuildData<AddressableAssetBuildResult>(builderInput);
-        Assert.IsTrue(string.IsNullOrEmpty(result.Error));
 
-        settings.ActivePlayModeDataBuilderIndex = settings.DataBuilders.FindIndex(b => b is BuildScriptPackedPlayMode);
+        if (BuildPipeline.IsBuildTargetSupported(builderInput.TargetGroup, builderInput.Target))
+        {
+            var builder = GetBuilderOfType(settings, typeof(BuildScriptPlayAssetDelivery));
+            var result = builder.BuildData<AddressableAssetBuildResult>(builderInput);
+            Assert.IsTrue(string.IsNullOrEmpty(result.Error));
+            settings.ActivePlayModeDataBuilderIndex = settings.DataBuilders.FindIndex(b => b is BuildScriptPackedPlayMode);
+        }
+        else
+        {
+            // running test in Editor without Standalone support, using FastMode to load addressables, no need to build data
+            settings.ActivePlayModeDataBuilderIndex = settings.DataBuilders.FindIndex(b => b is BuildScriptFastMode);
+        }
+#endif
+    }
+
+    public void Cleanup()
+    {
+#if UNITY_EDITOR
+        CleanupAddressables(false);
 #endif
     }
 
@@ -86,21 +107,11 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
         RuntimePlatform.WindowsPlayer,
         RuntimePlatform.OSXPlayer,
         RuntimePlatform.WindowsEditor,
-        RuntimePlatform.OSXEditor
+        RuntimePlatform.OSXEditor,
+        RuntimePlatform.LinuxEditor
     )]
     public IEnumerator TexturesCanBeLoaded()
     {
-        var texture = Resources.Load<Texture2D>(kNonAddressableTexture);
-        Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {kNonAddressableTexture} {texture.format}");
-
-        opHandle = Addressables.LoadAssetAsync<Texture2D>(Path.Combine(kSingleTestAssetFolder, kRemoteTexture).Replace('\\', '/'));
-        yield return opHandle;
-
-        Assert.AreEqual(AsyncOperationStatus.Succeeded, opHandle.Status);
-        texture = opHandle.Result;
-        Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {kRemoteTexture} {texture.format}");
-        Addressables.Release(opHandle);
-
 #if !UNITY_EDITOR && UNITY_ANDROID
         // checking asset pack states only when running on the Android device
         var assetPackNames = new string[TotalNumberOfGroups];
@@ -121,6 +132,56 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
         }
 #endif
 
+#if !UNITY_EDITOR && UNITY_ANDROID
+        // checking for sync loading on Android while no asset packs are downloaded
+        // there are multiple error messages and exceptions generated inside the main Addressables package if asset can't be loaded, but we're checking Addressables for Android specific messages only
+        LogAssert.ignoreFailingMessages = true;
+
+        // install time
+        Debug.Log(kStartLoadMessage);
+        LogAssert.Expect(LogType.Log, kStartLoadMessage);
+        opHandle = Addressables.LoadAssetAsync<Texture2D>(Path.Combine(kSingleTestAssetFolder, TextureName(0)).Replace('\\', '/'));
+        try
+        {
+            opHandle.WaitForCompletion();
+        }
+        catch (Exception e) {}
+        LogAssert.Expect(LogType.Error, kSyncMessage);
+        LogAssert.Expect(LogType.Error, new RemoteProviderException(kSyncMessage).ToString());
+        yield return new WaitForSeconds(1);
+
+        // on demand
+        Debug.Log(kStartLoadMessage);
+        LogAssert.Expect(LogType.Log, kStartLoadMessage);
+        opHandle = Addressables.LoadAssetAsync<Texture2D>(Path.Combine(kSingleTestAssetFolder, TextureName(5)).Replace('\\', '/'));
+        try
+        {
+            opHandle.WaitForCompletion();
+        }
+        catch (Exception e) {}
+        LogAssert.Expect(LogType.Error, kSyncMessage);
+        LogAssert.Expect(LogType.Error, new RemoteProviderException(kSyncMessage).ToString());
+        yield return new WaitForSeconds(1);
+
+        Debug.Log(kStopLoadMessage);
+        LogAssert.Expect(LogType.Log, kStopLoadMessage);
+        // there should be no more error messages
+        LogAssert.ignoreFailingMessages = false;
+#endif
+
+        // checking non-addressable texture
+        var texture = Resources.Load<Texture2D>(kNonAddressableTexture);
+        Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {kNonAddressableTexture} {texture.format}");
+
+        // checking texture from Remote group
+        opHandle = Addressables.LoadAssetAsync<Texture2D>(Path.Combine(kSingleTestAssetFolder, kRemoteTexture).Replace('\\', '/'));
+        yield return opHandle;
+        Assert.AreEqual(AsyncOperationStatus.Succeeded, opHandle.Status);
+        texture = opHandle.Result;
+        Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {kRemoteTexture} {texture.format}");
+        Addressables.Release(opHandle);
+
+        // checking textures from Addressable groups
         for (int i = 0; i < TotalNumberOfGroups; ++i)
         {
             opHandle = Addressables.LoadAssetAsync<Texture2D>(Path.Combine(kSingleTestAssetFolder, TextureName(i)).Replace('\\', '/'));
@@ -145,6 +206,17 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
             Assert.AreEqual(status, state.status, $"After downloading: asset pack {state.name} delivery type {GenerateDeliveryType(i)}");
         }
 #endif
+
+        // check that sync downloading works (on Android only after asset packs are downloaded)
+        for (int i = 0; i < TotalNumberOfGroups; ++i)
+        {
+            opHandle = Addressables.LoadAssetAsync<Texture2D>(Path.Combine(kSingleTestAssetFolder, TextureName(i)).Replace('\\', '/'));
+            opHandle.WaitForCompletion();
+            Assert.AreEqual(AsyncOperationStatus.Succeeded, opHandle.Status);
+            texture = opHandle.Result;
+            Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {TextureName(i)} {texture.format}");
+            Addressables.Release(opHandle);
+        }
 
         // trying to download from the same bundle second time to ensure that asset bundles caching works properly
         for (int i = 0; i < NumberOfGroups; ++i)

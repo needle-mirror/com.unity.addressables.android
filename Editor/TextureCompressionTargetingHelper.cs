@@ -20,7 +20,9 @@ namespace UnityEditor.AddressableAssets.Android
                 MobileTextureSubtarget.ETC => "#tcf_etc1",
                 MobileTextureSubtarget.ETC2 => "#tcf_etc2",
                 MobileTextureSubtarget.ASTC => "#tcf_astc",
+#pragma warning disable 618
                 MobileTextureSubtarget.PVRTC => "#tcf_pvrtc",
+#pragma warning restore 618
                 MobileTextureSubtarget.DXT => "#tcf_dxt1",
                 _ => throw new ArgumentException($"{subtarget} is not supported by TCFT")
             };
@@ -43,7 +45,9 @@ namespace UnityEditor.AddressableAssets.Android
                 TextureCompressionFormat.ETC => MobileTextureSubtarget.ETC,
                 TextureCompressionFormat.ETC2 => MobileTextureSubtarget.ETC2,
                 TextureCompressionFormat.ASTC => MobileTextureSubtarget.ASTC,
+#pragma warning disable 618
                 TextureCompressionFormat.PVRTC => MobileTextureSubtarget.PVRTC,
+#pragma warning restore 618
                 TextureCompressionFormat.DXTC => MobileTextureSubtarget.DXT,
                 TextureCompressionFormat.DXTC_RGTC => MobileTextureSubtarget.DXT,
                 _ => throw new ArgumentException($"{compression} is not supported by TCFT")

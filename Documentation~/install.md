@@ -20,7 +20,7 @@ After both the packages are installed, before you set up Addressables for Androi
 1. Go to **Window > Asset Management > Addressables > Groups** to open the **Addressables Groups** window.
 2. Click **Create Addressables Settings**.
 
-For more information on how to set up Addressables, refer to [Install Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@1.21/manual/installation-guide.html).
+For more information on how to set up Addressables, refer to [Install Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@2.3/manual/installation-guide.html).
 
 After you set up Addressables, continue with the Addressables for Android setup.
 
@@ -30,7 +30,7 @@ After you set up Addressables, continue with the Addressables for Android setup.
 
 After you install the Addressables for Android package, you can access a new menu option **Init Play Asset Delivery** under **Window> Asset Management > Addressables**.
 
-![Init Play Asset Delivery option](images/init-pad.png)
+![Init Play Asset Delivery option](images/init-pad.png) <br/>_Init Play Asset Delivery option_
 
 To set up Addressables for Android, use the following steps:
 
@@ -40,16 +40,16 @@ To set up Addressables for Android, use the following steps:
 
 2. Click your preferred option to either automatically assign the Play Asset Delivery schema right away or manually assign the schema later.
 
-[Play Asset Delivery support](images/add-pad-schema.png)
+    ![Play Asset Delivery support](images/add-pad-schema.png) <br/>_Play Asset Delivery support_
 
 When Addressables for Android is fully set up, the **Init Play Asset Delivery** menu option is grayed out.
 
-Unity generates Android asset packs when [Android App Bundle](https://docs.unity3d.com/2023.2/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android Build settings, and either the [Split Application Binary](https://docs.unity3d.com/Manual/class-PlayerSettingsAndroid.html#splitapplicationbinary) property or the [Texture Compression Targeting](https://docs.unity3d.com/2023.2/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting) is enabled in the Android Player settings.
+Unity generates Android asset packs when [Android App Bundle](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android Build settings, and either the [Split Application Binary](https://docs.unity3d.com/Manual/class-PlayerSettingsAndroid.html#splitapplicationbinary) property or the [Texture Compression Targeting](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting) is enabled in the Android Player settings.
 
 > [!NOTE]
 > * By default, Delivery Type for asset packs is set to **Fast Follow** which you can edit later.
 > * Play Asset Delivery schema added to the groups affects Android builds only. Building Addressables content for other platforms is not affected.
-* A warning message is displayed if the total number of groups with Play Asset Delivery schema exceeds [Google's limit](https://developer.android.com/guide/playcore/asset-delivery#download-size-limits) for total number of asset packs, which is 50. In this case, you can make some groups **Install Time** or combine some of the groups into larger asset packs using Custom Asset Packs functionality. For more information, refer to [Play asset delivery schema reference](play-asset-delivery-schema-reference.md).
+> * A warning message is displayed if the total number of groups with Play Asset Delivery schema exceeds [**Google's limit**](https://support.google.com/googleplay/android-developer/answer/9859372?hl=en&sjid=12405437898273768905-AP#size_limits) for total number of asset packs, which is `100`. In this case, you can make some groups **Install Time** or combine some of the groups into larger asset packs using Custom Asset Packs functionality. For more information, refer to [Play Asset Delivery schema reference](play-asset-delivery-schema-reference.md).
 
 ## Additional resources
 
