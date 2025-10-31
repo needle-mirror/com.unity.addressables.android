@@ -132,6 +132,10 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
         }
 #endif
 
+        // checking non-addressable texture
+        var texture = Resources.Load<Texture2D>(kNonAddressableTexture);
+        Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {kNonAddressableTexture} {texture.format}");
+
 #if !UNITY_EDITOR && UNITY_ANDROID
         // checking for sync loading on Android while no asset packs are downloaded
         // there are multiple error messages and exceptions generated inside the main Addressables package if asset can't be loaded, but we're checking Addressables for Android specific messages only
@@ -146,8 +150,18 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
             opHandle.WaitForCompletion();
         }
         catch (Exception e) {}
-        LogAssert.Expect(LogType.Error, kSyncMessage);
-        LogAssert.Expect(LogType.Error, new RemoteProviderException(kSyncMessage).ToString());
+        // the first synchronous loading from install time asset pack works if Addressables are initialized before this operation starts, this may depend on the main Addressables package
+        if (opHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            texture = opHandle.Result;
+            Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {TextureName(0)} {texture.format}");
+        }
+        else
+        {
+            LogAssert.Expect(LogType.Error, kSyncMessage);
+            LogAssert.Expect(LogType.Error, new RemoteProviderException(kSyncMessage).ToString());
+        }
+        Addressables.Release(opHandle);
         yield return new WaitForSeconds(1);
 
         // on demand
@@ -159,8 +173,10 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
             opHandle.WaitForCompletion();
         }
         catch (Exception e) {}
+        // the first synchronous loading from on demand asset pack should always fail
         LogAssert.Expect(LogType.Error, kSyncMessage);
         LogAssert.Expect(LogType.Error, new RemoteProviderException(kSyncMessage).ToString());
+        Addressables.Release(opHandle);
         yield return new WaitForSeconds(1);
 
         Debug.Log(kStopLoadMessage);
@@ -169,10 +185,6 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
         LogAssert.ignoreFailingMessages = false;
 #endif
 
-        // checking non-addressable texture
-        var texture = Resources.Load<Texture2D>(kNonAddressableTexture);
-        Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {kNonAddressableTexture} {texture.format}");
-
         // checking texture from Remote group
         opHandle = Addressables.LoadAssetAsync<Texture2D>(Path.Combine(kSingleTestAssetFolder, kRemoteTexture).Replace('\\', '/'));
         yield return opHandle;
@@ -180,6 +192,7 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
         texture = opHandle.Result;
         Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {kRemoteTexture} {texture.format}");
         Addressables.Release(opHandle);
+        yield return null;
 
         // checking textures from Addressable groups
         for (int i = 0; i < TotalNumberOfGroups; ++i)
@@ -191,6 +204,7 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
             texture = opHandle.Result;
             Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {TextureName(i)} {texture.format}");
             Addressables.Release(opHandle);
+            yield return null;
         }
 
 #if !UNITY_EDITOR && UNITY_ANDROID
@@ -216,6 +230,7 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
             texture = opHandle.Result;
             Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {TextureName(i)} {texture.format}");
             Addressables.Release(opHandle);
+            yield return null;
         }
 
         // trying to download from the same bundle second time to ensure that asset bundles caching works properly
@@ -233,6 +248,7 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
             texture = opHandle.Result;
             Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture second_{TextureName(i)} {texture.format}");
             Addressables.Release(opHandle);
+            yield return null;
         }
 
 #if !UNITY_EDITOR && UNITY_ANDROID
@@ -251,6 +267,7 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
             texture = opHandle.Result;
             Assert.IsTrue(texture.format.ToString().StartsWith(kExpectedTextureFormat), $"Texture {TextureName(i)} {texture.format}");
             Addressables.Release(opHandle);
+            yield return null;
         }
 #endif
     }

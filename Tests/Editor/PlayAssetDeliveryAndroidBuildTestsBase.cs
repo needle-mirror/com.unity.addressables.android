@@ -15,9 +15,12 @@ using UnityEngine.TestTools;
 internal class PlayAssetDeliveryAndroidBuildTestsBase : PlayAssetDeliveryBuildTestsBase
 {
     [OneTimeSetUp]
-    public void InitAndroidBuild()
+    public void CheckBuildTarget()
     {
-        EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+        if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
+        {
+            Assert.Fail("BuildTarget should be set to Android to run these tests");
+        }
         PlayerSettings.SetIl2CppCodeGeneration(UnityEditor.Build.NamedBuildTarget.Android, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
     }
 

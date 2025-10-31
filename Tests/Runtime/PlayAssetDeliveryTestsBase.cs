@@ -122,11 +122,22 @@ internal abstract class PlayAssetDeliveryTestsBase
 
     void ValidateSeparateAssets(string path, int group)
     {
-        var texturesFolder = Path.Combine(path, $"{GroupName(group).Item1}_assets_assets".ToLower(), kTestFolder.ToLower());
-        Assert.IsTrue(Directory.Exists(texturesFolder));
-        var textureFiles = Directory.GetFiles(texturesFolder);
-        Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith(TextureName(group).ToLower())));
-        Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith($"second_{TextureName(group)}".ToLower())));
+        var groupFolder = $"{GroupName(group).Item1}_assets_assets".ToLower();
+        var texturesFolder = Path.Combine(path, groupFolder, kTestFolder.ToLower());
+        if (Directory.Exists(texturesFolder))
+        {
+            // Addressables <= 2.6.0
+            var textureFiles = Directory.GetFiles(texturesFolder);
+            Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith(TextureName(group).ToLower())));
+            Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith($"second_{TextureName(group)}".ToLower())));
+        }
+        else
+        {
+            // Addressables >= 2.7.0
+            var textureFiles = Directory.GetFiles(path);
+            Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith($"{groupFolder}_{kTestFolder}_{TextureName(group)}".ToLower())));
+            Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith($"{groupFolder}_{kTestFolder}_second_{TextureName(group)}".ToLower())));
+        }
     }
 
     protected void ValidateGroupsInBuildFolder(string buildPath)

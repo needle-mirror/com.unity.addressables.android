@@ -44,7 +44,13 @@ To set up Addressables for Android, use the following steps:
 
 When Addressables for Android is fully set up, the **Init Play Asset Delivery** menu option is grayed out.
 
-Unity generates Android asset packs when [Android App Bundle](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android Build settings, and either the [Split Application Binary](https://docs.unity3d.com/Manual/class-PlayerSettingsAndroid.html#splitapplicationbinary) property or the [Texture Compression Targeting](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting) is enabled in the Android Player settings.
+Unity generates Android asset packs when the following conditions are met:
+
+* [Android App Bundle](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android build settings
+* Either of the following settings is enabled in the Android Player settings:
+
+    * [Split Application Binary](https://docs.unity3d.com/6000.3/Documentation/Manual/android-optimize-distribution-size#splitting-the-application-binary)
+    * [Texture Compression Targeting](https://docs.unity3d.com/6000.3/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting). Note that enabling **Texture Compression Targeting** automatically enables **Split Application Binary**.
 
 > [!NOTE]
 > * By default, Delivery Type for asset packs is set to **Fast Follow** which you can edit later.

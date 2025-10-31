@@ -6,6 +6,8 @@ uid: addressables-for-android-build-for-pad
 
 You can build Addressables content for Android with the Play Asset Delivery option only when you set the current platform to Android and set up Play Asset Delivery support. For more information on how to set up Play Asset Delivery support, refer to [Set up the Addressables for Android package](install.md#android-addressables).
 
+When you build for Android, the Addressables groups are packed into asset packs. These asset packs are automatically included in the Android App Bundle (AAB) for your application when you upload it to the Play Store. You need not upload individual asset packs separately. By default, each Addressable group is packed into a separate asset pack. You also have an option to manually pack multiple groups into one custom asset pack if required. For more information, refer to [Custom Asset Pack Settings](custom-asset-packs-settings.md).
+
 You can build Addressables content with the Player build or you can build it separately.
 
 >[!NOTE]
@@ -15,11 +17,17 @@ You can build Addressables content with the Player build or you can build it sep
 
 To build Addressables content, open the **Addressables Groups** window and go to **Build > New Build**. Then select **Play Asset Delivery** to run the **Play Asset Delivery** Addressables build script.
 
-![Play Asset Delivery](images/build-playassetdelivery.png) <br/>_Play Asset Delivery_
+![Addressables Groups window displaying Play Asset Delivery selection](images/build-playassetdelivery.png) <br/>_Play Asset Delivery_
 
 After building Addressables content, you can build the Player.
 
-Unity generates Android asset packs when [Android App Bundle](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android Build settings, and either the [Split Application Binary](https://docs.unity3d.com/Manual/class-PlayerSettingsAndroid.html#splitapplicationbinary) property or the [Texture Compression Targeting](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting) is enabled in the Android Player settings.
+Unity generates Android asset packs when the following conditions are met:
+
+* [Android App Bundle](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android build settings
+* Either of the following settings is enabled in the Android Player settings:
+
+    * [Split Application Binary](https://docs.unity3d.com/6000.3/Documentation/Manual/android-optimize-distribution-size#splitting-the-application-binary)
+    * [Texture Compression Targeting](https://docs.unity3d.com/6000.3/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting). Note that enabling **Texture Compression Targeting** automatically enables **Split Application Binary**.
 
 Otherwise, built Addressables content is included in the [Streaming Assets](https://docs.unity3d.com/Manual/StreamingAssets.html).
 

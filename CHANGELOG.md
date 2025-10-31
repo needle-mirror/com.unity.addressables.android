@@ -4,6 +4,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2025-10-31
+
+Fixed problem with loading Addressables content when asset pack is already installed to the device, but the device is offline.
+
 ## [1.0.6] - 2025-02-12
 
 * Loading Addressable assets synchronously can now generate an exception. For more information, refer to the documentation.

@@ -22,10 +22,13 @@ internal class PlayAssetDeliveryBuildWindowsTests : PlayAssetDeliveryBuildTestsB
     const string kPlatformName = "StandaloneWindows64";
 
     [OneTimeSetUp]
-    public void InitWindowsBuild()
+    public void CheckBuildTarget()
     {
+        if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.StandaloneWindows64)
+        {
+            Assert.Fail("BuildTarget should be set to Windows to run these tests");
+        }
         EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
-        EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
         PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
     }
 
@@ -90,7 +93,7 @@ internal class PlayAssetDeliveryBuildWindowsTests : PlayAssetDeliveryBuildTestsB
 
         if (oneStep)
         {
-            ValidateBuildFolderWithoutPAD("StandaloneWindows64");
+            ValidateBuildFolderWithoutPAD(kPlatformName);
         }
         ValidatePlayer();
     }

@@ -78,6 +78,16 @@ namespace UnityEngine.AddressableAssets.Android
                 base.Provide(providerInterface);
                 return;
             }
+            // Check that asset pack is downloaded, but not added to assetPackNameToDownloadPath
+            if (!assetPackNameToDownloadPath.ContainsKey(assetPackName))
+            {
+                var assetPackPath = AndroidAssetPacks.GetAssetPackPath(assetPackName);
+                if (!string.IsNullOrEmpty(assetPackPath))
+                {
+                    // Asset pack was located on device. Proceed with loading the bundle.
+                    assetPackNameToDownloadPath.Add(assetPackName, assetPackPath);
+                }
+            }
             // Bundle is assigned to the previously downloaded asset pack
             if (assetPackNameToDownloadPath.ContainsKey(assetPackName))
             {
@@ -108,28 +118,26 @@ namespace UnityEngine.AddressableAssets.Android
 
         void DownloadRemoteAssetPack(ProvideHandle providerInterface, string assetPackName)
         {
-            // Note that most methods in the AndroidAssetPacks class are either direct wrappers of java APIs in Google's PlayCore plugin,
-            // or depend on values that the PlayCore API returns. If the PlayCore plugin is missing, calling these methods will throw an InvalidOperationException exception.
-            try
+            if (!m_ProviderInterfaces.ContainsKey(assetPackName))
             {
-                if (!m_ProviderInterfaces.ContainsKey(assetPackName))
+                if (m_AssetPackQueue.Count == 0)
                 {
-                    if (m_AssetPackQueue.Count == 0)
-                    {
-                        Addressables.ResourceManager.AddUpdateReceiver(this);
-                    }
-                    m_ProviderInterfaces[assetPackName] = new HashSet<ProvideHandle>();
-                    m_AssetPackQueue.Add(assetPackName);
+                    Addressables.ResourceManager.AddUpdateReceiver(this);
                 }
-                m_ProviderInterfaces[assetPackName].Add(providerInterface);
+                m_ProviderInterfaces[assetPackName] = new HashSet<ProvideHandle>();
+                m_AssetPackQueue.Add(assetPackName);
             }
-            catch (InvalidOperationException ioe)
+            m_ProviderInterfaces[assetPackName].Add(providerInterface);
+        }
+
+        void FailDownloadAssetPack(string assetPackName, string message)
+        {
+            Debug.LogError(message);
+            foreach (var pi in m_ProviderInterfaces[assetPackName])
             {
-                m_ProviderInterfaces.Remove(assetPackName);
-                var message = $"Cannot retrieve state for asset pack '{assetPackName}'. This might be because PlayCore Plugin is not installed: {ioe.Message}";
-                Debug.LogError(message);
-                providerInterface.Complete<AssetBundleResource>(null, false, new RemoteProviderException(message));
+                pi.Complete<AssetBundleResource>(null, false, new RemoteProviderException(message));
             }
+            m_ProviderInterfaces.Remove(assetPackName);
         }
 
         void CheckDownloadStatus(AndroidAssetPackInfo info)
@@ -175,12 +183,7 @@ namespace UnityEngine.AddressableAssets.Android
 
             if (!string.IsNullOrEmpty(message))
             {
-                Debug.LogError(message);
-                foreach (var pi in m_ProviderInterfaces[info.name])
-                {
-                    pi.Complete<AssetBundleResource>(null, false, new RemoteProviderException(message));
-                }
-                m_ProviderInterfaces.Remove(info.name);
+                FailDownloadAssetPack(info.name, message);
             }
         }
 
@@ -190,7 +193,22 @@ namespace UnityEngine.AddressableAssets.Android
             if (m_AssetPackQueue.Count == 0) {
                 return;
             }
-            AndroidAssetPacks.DownloadAssetPackAsync(m_AssetPackQueue.ToArray(), CheckDownloadStatus);
+
+            // Note that most methods in the AndroidAssetPacks class are either direct wrappers of java APIs in Google's PlayCore plugin,
+            // or depend on values that the PlayCore API returns. If the PlayCore plugin is missing, calling these methods will throw an InvalidOperationException exception.
+            try
+            {
+                AndroidAssetPacks.DownloadAssetPackAsync(m_AssetPackQueue.ToArray(), CheckDownloadStatus);
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Debug.LogError(ioe);
+                foreach (var assetPackName in m_AssetPackQueue)
+                {
+                    var message = $"Cannot retrieve state for asset pack '{assetPackName}'. This might be because PlayCore Plugin is not installed: {ioe.Message}";
+                    FailDownloadAssetPack(assetPackName, message);
+                }
+            }
             m_AssetPackQueue.Clear();
             Addressables.ResourceManager.RemoveUpdateReciever(this);
         }

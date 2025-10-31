@@ -6,9 +6,9 @@ uid: addressables-for-android-pad-schema
 
 Play Asset Delivery schema instructs Addressables for Android system to pack group content for Play Asset Delivery. The schema can be added automatically when you set up the Addressables for Android package. You can also add the schema manually to the existing Addressable groups. Check Play Asset Delivery Schema in the Inspector window of your project.
 
-![Delivery Type](images/deliverytype.png) <br/> _Delivery Type_
+![Play Asset Delivery schema displaying Delivery Type selected as Fast Follow](images/deliverytype.png) <br/> _Delivery Type_
 
-![Custom Asset Pack](images/customassetpack.png) <br/> _Custom Asset Pack_
+![Play Asset Delivery schema displaying custom asset pack selection](images/customassetpack.png) <br/> _Custom Asset Pack_
 
 | **Property**| **Description** |
 |---|---|
