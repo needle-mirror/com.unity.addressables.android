@@ -4,7 +4,7 @@ uid: addressables-for-android-install
 
 # Install Addressables for Android package
 
-To install the Addressables for Android package in your project, use the [Unity Package Manager](https://docs.unity3d.com/Manual/Packages.html).
+To install the Addressables for Android package in your project, use the [Unity Package Manager](https://docs.unity3d.com/Manual/upm-ui.html).
 
 1. Open the **Package Manager** (menu: **Window** > **Package Manager**).
 2. Set the package list to display packages from the **Unity Registry**.
@@ -20,7 +20,7 @@ After both the packages are installed, before you set up Addressables for Androi
 1. Go to **Window > Asset Management > Addressables > Groups** to open the **Addressables Groups** window.
 2. Click **Create Addressables Settings**.
 
-For more information on how to set up Addressables, refer to [Install Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@2.3/manual/installation-guide.html).
+For more information on how to set up Addressables, refer to [Install Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@latest?subfolder=/manual/installation-guide.html).
 
 After you set up Addressables, continue with the Addressables for Android setup.
 
@@ -46,11 +46,11 @@ When Addressables for Android is fully set up, the **Init Play Asset Delivery** 
 
 Unity generates Android asset packs when the following conditions are met:
 
-* [Android App Bundle](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android build settings
+* [Android App Bundle](https://docs.unity3d.com/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android build settings
 * Either of the following settings is enabled in the Android Player settings:
 
-    * [Split Application Binary](https://docs.unity3d.com/6000.3/Documentation/Manual/android-optimize-distribution-size#splitting-the-application-binary)
-    * [Texture Compression Targeting](https://docs.unity3d.com/6000.3/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting). Note that enabling **Texture Compression Targeting** automatically enables **Split Application Binary**.
+    * [Split Application Binary](https://docs.unity3d.com/Manual/android-optimize-distribution-size#splitting-the-application-binary)
+    * [Texture Compression Targeting](https://docs.unity3d.com/Manual/android-distribution-google-play.html#texture-compression-targeting). Note that enabling **Texture Compression Targeting** automatically enables **Split Application Binary**.
 
 > [!NOTE]
 > * By default, Delivery Type for asset packs is set to **Fast Follow** which you can edit later.

@@ -4,11 +4,11 @@ uid: addressables-for-android-runtime
 
 # Manage asset packs at runtime
 
-You can use Addressables content packed into asset packs without modifying any Player code. There is no need to clear the [AssetBundle cache](https://docs.unity3d.com/Packages/com.unity.addressables@2.3/manual/remote-content-assetbundle-cache.html), as the Android system automatically deletes obsolete asset packs from the device when the application is updated.
+You can use Addressables content packed into asset packs without modifying any Player code. There is no need to clear the [AssetBundle cache](https://docs.unity3d.com/Packages/com.unity.addressables@latest?subfolder=/manual/remote-content-assetbundle-cache.html), as the Android system automatically deletes obsolete asset packs from the device when the application is updated.
 
 ## Load and remove asset packs
 
-When you [load Addressable assets](https://docs.unity3d.com/Packages/com.unity.addressables@2.3/manual/load-assets.html) that are packed into **On Demand** asset packs, the Player tries to install the required asset packs from Google Play. Depending on the network connectivity and the asset pack size, there might be a significant delay before the Addressable asset can be instantiated and displayed. To avoid this delay, you can force the required asset pack to load beforehand using [AndroidAssetPacks.DownloadAssetPackAsync](https://docs.unity3d.com/ScriptReference/Android.AndroidAssetPacks.DownloadAssetPackAsync.html) method.
+When you [load Addressable assets](https://docs.unity3d.com/Packages/com.unity.addressables@latest?subfolder=/manual/load-assets.html) that are packed into **On Demand** asset packs, the Player tries to install the required asset packs from Google Play. Depending on the network connectivity and the asset pack size, there might be a significant delay before the Addressable asset can be instantiated and displayed. To avoid this delay, you can force the required asset pack to load beforehand using [AndroidAssetPacks.DownloadAssetPackAsync](https://docs.unity3d.com/ScriptReference/Android.AndroidAssetPacks.DownloadAssetPackAsync.html) method.
 
 If you do not need any **Fast Follow** or **On Demand** asset packs anymore, you can forcefully remove those from the device using [AndroidAssetPacks.RemoveAssetPack](https://docs.unity3d.com/ScriptReference/Android.AndroidAssetPacks.RemoveAssetPack.html) method. Please note that, if the Player tries to load an already removed asset pack, the Android system automatically installs the same asset pack again on the device.
 

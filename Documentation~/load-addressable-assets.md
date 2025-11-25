@@ -4,7 +4,7 @@ uid: addressables-for-android-load-assets
 
 # Load Addressable assets from asset packs
 
-[Asynchronous loading](https://docs.unity3d.com/Packages/com.unity.addressables@latest?subfolder=/manual/load-assets-asynchronous.html) is the recommended way to load Addressable assets from asset packs.
+[Asynchronous loading](https://docs.unity3d.com/Packages/com.unity.addressables@latest?subfolder=/manual/load-manage-asynchronous-loads.html) is the recommended way to load Addressable assets from asset packs.
 
 You can load the assets synchronously by calling the `WaitForCompletion()` method on the `AsyncOperationHandle`. Before doing this, ensure that you [initialize the Addressables system](https://docs.unity3d.com/Packages/com.unity.addressables@latest?subfolder=/manual/InitializeAsync.html). This initialization step isn't required when loading assets asynchronously, because the Addressables system automatically initializes during the first asynchronous load call.
 

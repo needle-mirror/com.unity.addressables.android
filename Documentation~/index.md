@@ -19,4 +19,4 @@ Furthermore, you can pack different texture compression variants to Android asse
 ## Additional resources
 * [Play Asset Delivery](https://developer.android.com/guide/playcore/asset-delivery)
 * [Addressables package](xref:addressables-home)
-* [Texture Compression Targeting support](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting)
+* [Texture Compression Targeting support](https://docs.unity3d.com/Manual/android-distribution-google-play.html#texture-compression-targeting)

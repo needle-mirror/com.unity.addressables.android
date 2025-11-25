@@ -17,17 +17,17 @@ You can build Addressables content with the Player build or you can build it sep
 
 To build Addressables content, open the **Addressables Groups** window and go to **Build > New Build**. Then select **Play Asset Delivery** to run the **Play Asset Delivery** Addressables build script.
 
-![Addressables Groups window displaying Play Asset Delivery selection](images/build-playassetdelivery.png) <br/>_Play Asset Delivery_
+![Addressables Groups window displaying Play Asset Delivery selection](images/build-playassetdelivery.png) <br/>_Addressables Groups window displaying Play Asset Delivery selection_
 
 After building Addressables content, you can build the Player.
 
 Unity generates Android asset packs when the following conditions are met:
 
-* [Android App Bundle](https://docs.unity3d.com/6000.0/Documentation/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android build settings
+* [Android App Bundle](https://docs.unity3d.com/Manual/android-distribution-google-play.html#android-app-bundle) is enabled in Android build settings
 * Either of the following settings is enabled in the Android Player settings:
 
-    * [Split Application Binary](https://docs.unity3d.com/6000.3/Documentation/Manual/android-optimize-distribution-size#splitting-the-application-binary)
-    * [Texture Compression Targeting](https://docs.unity3d.com/6000.3/Documentation/Manual/android-distribution-google-play.html#texture-compression-targeting). Note that enabling **Texture Compression Targeting** automatically enables **Split Application Binary**.
+    * [Split Application Binary](https://docs.unity3d.com/Manual/android-optimize-distribution-size#splitting-the-application-binary)
+    * [Texture Compression Targeting](https://docs.unity3d.com/Manual/android-distribution-google-play.html#texture-compression-targeting). Note that enabling **Texture Compression Targeting** automatically enables **Split Application Binary**.
 
 Otherwise, built Addressables content is included in the [Streaming Assets](https://docs.unity3d.com/Manual/StreamingAssets.html).
 
