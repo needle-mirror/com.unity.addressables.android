@@ -1,7 +1,7 @@
 {
   "name": "com.unity.addressables.android",
   "displayName": "Addressables for Android",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "unity": "2023.2",
   "description": "The Addressables for Android package is designed to work in conjunction with the Addressables package to support Play Asset Delivery and provides tools to pack Addressables groups into Android asset packs. This way you can take full advantage of asset pack based dynamic delivery, including Texture Compression Targeting support when it's enabled for your project.",
   "samples": [
@@ -17,15 +17,15 @@
     "com.unity.addressables": "2.3.16"
   },
   "_upm": {
-    "changelog": "Updated documentation."
+    "changelog": "Fixed problem with spurious \"Unable to find registered file for bundle\" errors when setting \"Bundle Naming Mode\" to \"No Hash\" and building with multiple Android texture compression formats.\nUnity 6.5+ specific: Handling AndroidAssetPackStatus.RequiresUserConfirmation and using AndroidAssetPacks.ShowConfirmationDialogAsync method instead of deprecated AndroidAssetPacks.RequestToUseMobileDataAsync."
   },
   "upmCi": {
-    "footprint": "97e855ac18f7e3478ee826d080ad7b1bc0ce78f3"
+    "footprint": "543f7938968e7ba5ccd2d8c6ce5a44373d9b306f"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.addressables.android@1.0/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.addressables.android.git",
     "type": "git",
-    "revision": "9c82c5379cb57e60bf56acbcb153ac012f0a2aca"
+    "revision": "787a8e9815b4faebecdf9b5e1e064420add1d744"
   }
 }

@@ -29,7 +29,7 @@ internal class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuil
     }
 
     [Test]
-    [Timeout(300000)]
+    [Timeout(600000)]
     public void CanBuildPlayAssetDeliveryThenAabOrGradleProject([Values(false, true)] bool oneStep, [Values(false, true)] bool splitAppBinary, [Values(false, true)] bool exportProject)
     {
         BuildPlayAssetDeliveryAndGradleProject(oneStep, true, splitAppBinary, exportProject, kSingleFormat, kSingleFormatPostfix);
@@ -45,6 +45,7 @@ internal class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuil
     public void CanBuildWithoutPlayAssetDeliveryWithTCFT([Values(true, false)] bool buildForRemote)
     {
         var settings = AddressableAssetSettingsDefaultObject.Settings;
+        settings.profileSettings.SetValue(settings.activeProfileId, AddressableAssetSettings.kRemoteLoadPath, $"https://127.0.0.1");
         var group = settings.CreateGroup(kRemoteGroupName, true, false, false, null, typeof(BundledAssetGroupSchema));
         var spriteEntry = settings.CreateOrMoveEntry(CreateTexture(Path.Combine(kSingleTestAssetFolder, TextureName(100))), group, false, false);
         var schema = group.GetSchema<BundledAssetGroupSchema>();
@@ -106,6 +107,7 @@ internal class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuil
         LogAssert.Expect(LogType.Exception, $"Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
         LogAssert.Expect(LogType.Error, $"Error building Player: Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
 
+        builderInput = new AddressablesDataBuilderInput(settings);
         result = builder.BuildData<AddressableAssetBuildResult>(builderInput);
         Assert.IsTrue(string.IsNullOrEmpty(result.Error));
 

@@ -29,6 +29,8 @@ internal abstract class PlayAssetDeliveryTestsBase
 
     protected virtual bool PackTogether(int index) { return true; }
 
+    protected virtual bool NoHash(int index) { return false; }
+
     protected const string kTestFolder = "TestFolder";
 
     protected static string kSingleTestAssetFolder => Path.Combine("Assets", kTestFolder);
@@ -53,6 +55,7 @@ internal abstract class PlayAssetDeliveryTestsBase
     protected string CreateAsset(string path, string name)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        GameObject.DestroyImmediate(go.GetComponent("BoxCollider")); // to get rid of warning while building addressables
         go.name = name;
         //this is to ensure that bundles are different for every run.
         go.transform.localPosition = UnityEngine.Random.onUnitSphere;
@@ -120,9 +123,23 @@ internal abstract class PlayAssetDeliveryTestsBase
 #endif
     }
 
-    void ValidateSeparateAssets(string path, int group)
+    string ValidateGroupInBuildFolder(string path, string[] bundleFiles, int group)
     {
-        var groupFolder = $"{GroupName(group).Item1}_assets_assets".ToLower();
+        var groupAssets = $"{GroupName(group).Item1}_assets".ToLower();
+        if (PackTogether(group))
+        {
+            // validate packed together assets
+            var bundleFile = Array.Find(bundleFiles,
+                NoHash(group) ?
+                    p => Path.GetFileName(p).Equals($"{groupAssets}_all.bundle") :
+                    p => Path.GetFileName(p).StartsWith($"{groupAssets}_all_")
+                );
+            Assert.IsTrue(!string.IsNullOrEmpty(bundleFile));
+            return bundleFile;
+        }
+
+        // validate separate assets
+        var groupFolder = $"{groupAssets}_assets";
         var texturesFolder = Path.Combine(path, groupFolder, kTestFolder.ToLower());
         if (Directory.Exists(texturesFolder))
         {
@@ -138,6 +155,7 @@ internal abstract class PlayAssetDeliveryTestsBase
             Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith($"{groupFolder}_{kTestFolder}_{TextureName(group)}".ToLower())));
             Assert.IsTrue(Array.Exists(textureFiles, p => Path.GetFileName(p).StartsWith($"{groupFolder}_{kTestFolder}_second_{TextureName(group)}".ToLower())));
         }
+        return null;
     }
 
     protected void ValidateGroupsInBuildFolder(string buildPath)
@@ -149,14 +167,7 @@ internal abstract class PlayAssetDeliveryTestsBase
         var bundleFiles = Directory.GetFiles(buildPath);
         for (int i = 0; i < TotalNumberOfGroups; ++i)
         {
-            if (PackTogether(i))
-            {
-                Assert.IsTrue(Array.Exists(bundleFiles, p => Path.GetFileName(p).StartsWith($"{GroupName(i).Item1}_assets_all_".ToLower())));
-            }
-            else
-            {
-                ValidateSeparateAssets(buildPath, i);
-            }
+            ValidateGroupInBuildFolder(buildPath, bundleFiles, i);
         }
         // this can be _unitybuiltinassets or _unitybuiltinshaders files, depending on addressables package version
         Assert.AreEqual(NumberOfGroups > 0, Array.Exists(bundleFiles, p => Path.GetFileName(p).IndexOf("unitybuiltin") >= 0));
@@ -236,11 +247,9 @@ internal abstract class PlayAssetDeliveryTestsBase
             foreach (var postfix in postfixes)
             {
                 var assetsPath = Path.Combine(gradleProject, androidPackName, $"{CustomAssetPackUtility.CustomAssetPacksAssetsPath}{postfix}", "Android");
-                if (PackTogether(i))
+                var bundleFile = ValidateGroupInBuildFolder(assetsPath, Directory.GetFiles(assetsPath), i);
+                if (!string.IsNullOrEmpty(bundleFile))
                 {
-                    var bundleFiles = Directory.GetFiles(assetsPath);
-                    var bundleFile = Array.Find(bundleFiles, p => Path.GetFileName(p).StartsWith($"{GroupName(i).Item1}_assets_all_".ToLower()));
-                    Assert.IsTrue(!string.IsNullOrEmpty(bundleFile));
                     if (postfix == "")
                     {
                         defaultBundle = Path.GetFileName(bundleFile);
@@ -249,10 +258,6 @@ internal abstract class PlayAssetDeliveryTestsBase
                     {
                         Assert.AreEqual(Path.GetFileName(bundleFile), defaultBundle);
                     }
-                }
-                else
-                {
-                    ValidateSeparateAssets(assetsPath, i);
                 }
             }
         }
@@ -282,7 +287,8 @@ internal abstract class PlayAssetDeliveryTestsBase
         {
             return;
         }
-        var bundleFiles = Directory.GetFiles(Path.Combine(aaPath, "Android"));
+        var buildPath = Path.Combine(aaPath, "Android");
+        var bundleFiles = Directory.GetFiles(buildPath);
         for (int i = 0; i < TotalNumberOfGroups; ++i)
         {
             var androidPackName = GroupName(i).Item2;
@@ -291,14 +297,7 @@ internal abstract class PlayAssetDeliveryTestsBase
                 var assetPackFolderName = Path.Combine(gradleProject, androidPackName);
                 Assert.IsFalse(Directory.Exists(assetPackFolderName));
             }
-            if (PackTogether(i))
-            {
-                Assert.IsTrue(Array.Exists(bundleFiles, p => Path.GetFileName(p).StartsWith($"{GroupName(i).Item1}_assets_all_".ToLower())));
-            }
-            else
-            {
-                ValidateSeparateAssets(Path.Combine(aaPath, "Android"), i);
-            }
+            ValidateGroupInBuildFolder(buildPath, bundleFiles, i);
         }
         // this can be _unitybuiltinassets or _unitybuiltinshaders files, depending on addressables package version
         Assert.AreEqual(NumberOfGroups > 0, Array.Exists(bundleFiles, p => Path.GetFileName(p).IndexOf("unitybuiltin") >= 0));
@@ -376,6 +375,12 @@ internal abstract class PlayAssetDeliveryTestsBase
             {
                 var bundledAssetsSchema = group.GetSchema<BundledAssetGroupSchema>();
                 bundledAssetsSchema.BundleMode = BundledAssetGroupSchema.BundlePackingMode.PackSeparately;
+            }
+            if (NoHash(i))
+            {
+                // to test https://jira.unity3d.com/browse/CBD-1812
+                var bundledAssetsSchema = group.GetSchema<BundledAssetGroupSchema>();
+                bundledAssetsSchema.BundleNaming = BundledAssetGroupSchema.BundleNamingStyle.NoHash;
             }
         }
         var customAssetPacks = CustomAssetPackSettings.GetSettings(true);

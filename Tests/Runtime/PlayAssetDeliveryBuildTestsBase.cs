@@ -75,4 +75,9 @@ internal abstract class PlayAssetDeliveryBuildTestsBase : PlayAssetDeliveryTests
     {
         return (index != 4);
     }
+
+    protected override bool NoHash(int index)
+    {
+        return (index == 1);
+    }
 }

@@ -155,7 +155,12 @@ namespace UnityEngine.AddressableAssets.Android
                     message = $"Cancelled asset pack download request '{info.name}'.";
                     break;
                 case AndroidAssetPackStatus.WaitingForWifi:
+#if UNITY_6000_5_OR_NEWER
+                case AndroidAssetPackStatus.RequiresUserConfirmation:
+                    AndroidAssetPacks.ShowConfirmationDialogAsync(OnConfirmationDialogComplete);
+#else
                     AndroidAssetPacks.RequestToUseMobileDataAsync(OnRequestToUseMobileDataComplete);
+#endif
                     break;
                 case AndroidAssetPackStatus.Completed:
                     {
@@ -213,21 +218,35 @@ namespace UnityEngine.AddressableAssets.Android
             Addressables.ResourceManager.RemoveUpdateReciever(this);
         }
 
+#if UNITY_6000_5_OR_NEWER
+        void OnConfirmationDialogComplete(AndroidAssetPackConfirmationDialogResult result)
+        {
+            if (result.consentGiven)
+                return;
+            var message = "Consent to install asset pack(s) was not given.";
+            FailAllInterfaces(message);
+        }
+#else
         void OnRequestToUseMobileDataComplete(AndroidAssetPackUseMobileDataRequestResult result)
         {
-            if (!result.allowed)
+            if (result.allowed)
+                return;
+            var message = "Request to use mobile data was denied.";
+            FailAllInterfaces(message);
+        }
+#endif
+
+        void FailAllInterfaces(string message)
+        {
+            Debug.LogError(message);
+            foreach (var p in m_ProviderInterfaces)
             {
-                var message = "Request to use mobile data was denied.";
-                Debug.LogError(message);
-                foreach (var p in m_ProviderInterfaces)
+                foreach (var pi in p.Value)
                 {
-                    foreach (var pi in p.Value)
-                    {
-                        pi.Complete<AssetBundleResource>(null, false, new RemoteProviderException(message));
-                    }
+                    pi.Complete<AssetBundleResource>(null, false, new RemoteProviderException(message));
                 }
-                m_ProviderInterfaces.Clear();
             }
+            m_ProviderInterfaces.Clear();
         }
 
         internal void CompleteInterface(ProvideHandle handle)

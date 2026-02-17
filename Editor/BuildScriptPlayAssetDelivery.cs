@@ -7,6 +7,7 @@ using UnityEditor.AddressableAssets.Build;
 using UnityEditor.AddressableAssets.Build.DataBuilders;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
+using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEngine;
 using UnityEngine.ResourceManagement.Util;
 using UnityEngine.AddressableAssets;
@@ -215,9 +216,12 @@ namespace UnityEditor.AddressableAssets.Android
                 {
                     foreach (var format in PlayerSettings.Android.textureCompressionFormats.AsEnumerable().Reverse())
                     {
-                        EditorUserBuildSettings.androidBuildSubtarget = TextureCompressionTargetingHelper.ConvertToMobileTextureSubtarget(format);
-                        AssetDatabase.Refresh();
-                        AddResult(ref result, base.BuildDataImplementation<TResult>(builderInput));
+                        using (Log.ScopedStep(LogLevel.Info, $"Build content for texture format {format}"))
+                        {
+                            EditorUserBuildSettings.androidBuildSubtarget = TextureCompressionTargetingHelper.ConvertToMobileTextureSubtarget(format);
+                            AssetDatabase.Refresh();
+                            AddResult(ref result, base.BuildDataImplementation<TResult>(builderInput));
+                        }
                     }
                 }
                 finally
@@ -258,7 +262,48 @@ namespace UnityEditor.AddressableAssets.Android
 
             // Create custom asset packs
             CreateAssetPacks(aaContext.Settings);
+
+
+            // Update registry paths after files are moved to texture compression specific directory.
+            // This is necessary because CreateAssetPacks moves files from Addressables.BuildPath to
+            // Addressables.BuildPath + postfix, but the registry still contains the original paths.
+            // Without this update, subsequent texture compression builds will fail when trying to
+            // replace bundle entries in the registry because the non-hashed names already exist.
+            if (TextureCompressionTargetingHelper.EnabledTextureCompressionTargeting &&
+                !TextureCompressionTargetingHelper.IsCurrentTextureCompressionDefault)
+            {
+                UpdateRegistryPathsForTextureCompression(builderInput.Registry, TextureCompressionTargetingHelper.TcfPostfix());
+            }
+
             return result;
+        }
+
+        /// <summary>
+        /// Updates file registry paths after files have been moved to a texture compression specific directory.
+        /// </summary>
+        /// <param name="registry">The file registry to update</param>
+        /// <param name="postfix">The texture compression postfix that was appended to the build path</param>
+        void UpdateRegistryPathsForTextureCompression(FileRegistry registry, string postfix)
+        {
+            if (registry == null || string.IsNullOrEmpty(postfix))
+                return;
+
+            var oldBuildPath = Addressables.BuildPath;
+            var newBuildPath = $"{Addressables.BuildPath}{postfix}";
+
+            // Get all current file paths from the registry
+            var filePaths = registry.GetFilePaths().ToList();
+
+            // Update paths that were under the old build path to use the new postfixed path
+            foreach (var filePath in filePaths)
+            {
+                if (filePath.StartsWith(oldBuildPath, StringComparison.Ordinal))
+                {
+                    var newPath = newBuildPath + filePath.Substring(oldBuildPath.Length);
+                    registry.RemoveFile(filePath);
+                    registry.AddFile(newPath);
+                }
+            }
         }
 
         /// <inheritdoc/>

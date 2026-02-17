@@ -4,6 +4,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.10] - 2026-02-17
+
+Fixed problem with spurious "Unable to find registered file for bundle" errors when setting "Bundle Naming Mode" to "No Hash" and building with multiple Android texture compression formats.
+Unity 6.5+ specific: Handling AndroidAssetPackStatus.RequiresUserConfirmation and using AndroidAssetPacks.ShowConfirmationDialogAsync method instead of deprecated AndroidAssetPacks.RequestToUseMobileDataAsync.
+
 ## [1.0.9] - 2025-11-25
 
 Updated documentation.
