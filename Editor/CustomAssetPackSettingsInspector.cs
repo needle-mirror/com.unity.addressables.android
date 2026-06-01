@@ -8,7 +8,6 @@ namespace UnityEditor.AddressableAssets.Android
     class CustomAssetPackSettingsInspector : UnityEditor.Editor
     {
         CustomAssetPackSettings m_Settings;
-        [SerializeField]
         ReorderableList m_CustomAssetPacks;
 
         void OnEnable()

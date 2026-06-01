@@ -111,7 +111,11 @@ namespace UnityEngine.AddressableAssets.Android
             m_ProviderInterfaces.Clear();
         }
 
+#if UNITY_ADDRESSABLES_3_0_OR_NEWER
+        public override IOperationCacheKey CreateCacheKeyForLocation(ResourceManager rm, IResourceLocation location, Type desiredType)
+#else
         internal override IOperationCacheKey CreateCacheKeyForLocation(ResourceManager rm, IResourceLocation location, Type desiredType)
+#endif
         {
             return new IdCacheKey(location.GetType(), location.InternalId);
         }
