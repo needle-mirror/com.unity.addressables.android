@@ -76,6 +76,18 @@ internal class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuil
         }
     }
 
+    static void ExpectAddressablesMustBeBuiltErrors()
+    {
+        LogAssert.Expect(LogType.Exception, $"Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
+        LogAssert.Expect(LogType.Error,
+#if UNITY_6000_6_OR_NEWER
+            $"Error building Player: a BuildPlayerProcessor.PrepareForBuild callback failed: Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}"
+#else
+            $"Error building Player: Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}"
+#endif
+        );
+    }
+
     [Test]
     public void BuildGradleProjectWithoutBuildingAddressablesFails()
     {
@@ -92,8 +104,7 @@ internal class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuil
         // build player when no addressables groups are built should fail
         var report = BuildPipeline.BuildPlayer(options);
         Assert.AreNotEqual(BuildResult.Succeeded, report.summary.result);
-        LogAssert.Expect(LogType.Exception, $"Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
-        LogAssert.Expect(LogType.Error, $"Error building Player: Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
+        ExpectAddressablesMustBeBuiltErrors();
 
         var builder = GetBuilderOfType(settings, typeof(BuildScriptPlayAssetDelivery));
         var builderInput = new AddressablesDataBuilderInput(settings);
@@ -104,8 +115,7 @@ internal class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuil
         PlayerSettings.Android.textureCompressionFormats = kMultiFormats;
         report = BuildPipeline.BuildPlayer(options);
         Assert.AreNotEqual(BuildResult.Succeeded, report.summary.result);
-        LogAssert.Expect(LogType.Exception, $"Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
-        LogAssert.Expect(LogType.Error, $"Error building Player: Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
+        ExpectAddressablesMustBeBuiltErrors();
 
         builderInput = new AddressablesDataBuilderInput(settings);
         result = builder.BuildData<AddressableAssetBuildResult>(builderInput);
@@ -115,8 +125,7 @@ internal class PlayAssetDeliveryAndroidBuildTests : PlayAssetDeliveryAndroidBuil
         PlayerSettings.Android.textureCompressionFormats = new[] { TextureCompressionFormat.ETC2, TextureCompressionFormat.ASTC, TextureCompressionFormat.DXTC };
         report = BuildPipeline.BuildPlayer(options);
         Assert.AreNotEqual(BuildResult.Succeeded, report.summary.result);
-        LogAssert.Expect(LogType.Exception, $"Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
-        LogAssert.Expect(LogType.Error, $"Error building Player: Exception: {PlayAssetDeliverySecondBuildProcessor.kAddressableMustBeBuiltMessage}");
+        ExpectAddressablesMustBeBuiltErrors();
 
         // build player using correct texture compressions settings should succeed
         PlayerSettings.Android.textureCompressionFormats = kMultiFormats;

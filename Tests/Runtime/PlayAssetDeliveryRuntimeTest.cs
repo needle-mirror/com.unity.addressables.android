@@ -27,6 +27,11 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
     const string kStartLoadMessage = "Start sync loading";
     const string kStopLoadMessage = "Stop sync loading";
 
+    // Desktop players load this copy of the content catalog explicitly. The default 'catalog.bin' can be rebuilt by other
+    // test suites' IPrebuildSetup when this test shares a project with them (e.g. Addressables tests in package CI).
+    const string kIsolatedCatalogName = "catalogPlayAssetDeliveryRuntimeTest";
+    const string kIsolatedSettingsFileName = "settingsPlayAssetDeliveryRuntimeTest.json";
+
 #if UNITY_ANDROID
 #if UNITY_EDITOR
     // running test in Editor playmode, default texture compression is expected
@@ -79,6 +84,16 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
         if (BuildPipeline.IsBuildTargetSupported(builderInput.TargetGroup, builderInput.Target))
         {
             var builder = GetBuilderOfType(settings, typeof(BuildScriptPlayAssetDelivery));
+            if (builderInput.Target != BuildTarget.Android)
+            {
+                // Build the isolated catalog first, so the default build below is the last one and Editor play mode and
+                // player initialization still find the default 'settings.json'.
+                var isolatedInput = new AddressablesDataBuilderInput(settings);
+                isolatedInput.RuntimeSettingsFilename = kIsolatedSettingsFileName;
+                isolatedInput.RuntimeCatalogFilename = kIsolatedCatalogName + (settings.EnableJsonCatalog ? ".json" : ".bin");
+                var isolatedResult = builder.BuildData<AddressableAssetBuildResult>(isolatedInput);
+                Assert.IsTrue(string.IsNullOrEmpty(isolatedResult.Error));
+            }
             var result = builder.BuildData<AddressableAssetBuildResult>(builderInput);
             Assert.IsTrue(string.IsNullOrEmpty(result.Error));
             settings.ActivePlayModeDataBuilderIndex = settings.DataBuilders.FindIndex(b => b is BuildScriptPackedPlayMode);
@@ -112,6 +127,23 @@ class PlayAssetDeliveryRuntimeTest : PlayAssetDeliveryBuildTestsBase, IPrebuildS
     )]
     public IEnumerator TexturesCanBeLoaded()
     {
+#if !UNITY_EDITOR && !UNITY_ANDROID
+        var isolatedCatalogPath = $"{Addressables.RuntimePath}/{kIsolatedCatalogName}.bin";
+        if (!File.Exists(isolatedCatalogPath))
+        {
+            isolatedCatalogPath = $"{Addressables.RuntimePath}/{kIsolatedCatalogName}.json";
+        }
+        // LoadContentCatalogAsync looks up the catalog provider before it waits for initialization, and the catalog
+        // providers are registered by initialization, so initialize first.
+        var initHandle = Addressables.InitializeAsync(false);
+        yield return initHandle;
+        Addressables.Release(initHandle);
+        var catalogHandle = Addressables.LoadContentCatalogAsync(isolatedCatalogPath, false);
+        yield return catalogHandle;
+        Assert.AreEqual(AsyncOperationStatus.Succeeded, catalogHandle.Status, $"Failed to load {isolatedCatalogPath}: {catalogHandle.OperationException}");
+        Addressables.Release(catalogHandle);
+#endif
+
 #if !UNITY_EDITOR && UNITY_ANDROID
         // checking asset pack states only when running on the Android device
         var assetPackNames = new string[TotalNumberOfGroups];

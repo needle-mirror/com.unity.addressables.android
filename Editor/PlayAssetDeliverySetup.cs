@@ -1,4 +1,5 @@
 using System.IO;
+using Unity.Scripting.LifecycleManagement;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace UnityEditor.AddressableAssets.Android
         internal static string kTooManyAssetPacksMessage => $"The total number of asset packs in your App Bundle will be more than {kMaxAssetPacksNumber}. Google Play store accepts apps with up to {kMaxAssetPacksNumber} asset packs.\nConsider making some Addressables groups \"install-time\" or combining them into custom asset packs.";
 
         // required for auto-testing
+        [NoAutoStaticsCleanup]
         internal static bool? ForcePADToExistingAddressablesGroup { private get; set; } = null;
 
         static T CreateScriptAsset<T>(string subfolder) where T : ScriptableObject

@@ -1,6 +1,7 @@
 #if UNITY_EDITOR || UNITY_ANDROID
 using System.Collections.Generic;
 using System.IO;
+using Unity.Scripting.LifecycleManagement;
 #if UNITY_EDITOR && UNITY_ANDROID
 using Unity.Android.Types;
 #endif
@@ -66,6 +67,7 @@ namespace UnityEngine.AddressableAssets.Android
         };
 
 #if UNITY_EDITOR && UNITY_ANDROID
+        [NoAutoStaticsCleanup]
         static readonly Dictionary<DeliveryType, AndroidAssetPackDeliveryType> k_DeliveryTypeToGradleString = new Dictionary<DeliveryType, AndroidAssetPackDeliveryType>()
         {
             { DeliveryType.InstallTime, AndroidAssetPackDeliveryType.InstallTime },

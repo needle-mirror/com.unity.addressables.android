@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Unity.Scripting.LifecycleManagement;
 using UnityEditor.Build;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
@@ -23,8 +24,8 @@ namespace UnityEditor.AddressableAssets.Android
         /// </summary>
         public override int callbackOrder => 0;
 
-        static internal bool BuildingPlayer { get; set; } = false;
-
+        // Saved in PrepareForBuild and restored after the build, so it doesn't need resetting on entering Play mode.
+        [NoAutoStaticsCleanup]
         static internal int DataBuilderIndex { get; set; } = -1;
 
         /// <summary>
@@ -51,7 +52,6 @@ namespace UnityEditor.AddressableAssets.Android
                 DataBuilderIndex = settings.ActivePlayerDataBuilderIndex;
                 settings.ActivePlayerDataBuilderIndex = padBuildScriptIndex;
                 AddressablesPlayerBuildProcessor.AddPathToStreamingAssets = (string path) => false;
-                BuildingPlayer = true;
             }
         }
     }

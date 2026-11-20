@@ -29,7 +29,8 @@ internal class PlayAssetDeliveryBuildWindowsTests : PlayAssetDeliveryBuildTestsB
             Assert.Fail("BuildTarget should be set to Windows to run these tests");
         }
         EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
-        PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
+        // Mono2x on Editors that still ship Mono, CoreCLR on those that don't.
+        PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, PlayerSettings.GetDefaultScriptingBackend(NamedBuildTarget.Standalone));
     }
 
     [TearDown]

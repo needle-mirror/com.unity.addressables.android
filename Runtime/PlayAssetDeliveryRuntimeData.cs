@@ -1,15 +1,17 @@
 #if UNITY_ANDROID || UNITY_EDITOR
 using System.Collections.Generic;
+using Unity.Scripting.LifecycleManagement;
 
 namespace UnityEngine.AddressableAssets.Android
 {
     /// <summary>
     /// Stores runtime data for loading content from asset packs.
     /// </summary>
-    class PlayAssetDeliveryRuntimeData
+    partial class PlayAssetDeliveryRuntimeData
     {
         Dictionary<string, string> m_AssetPackNameToDownloadPath;
         Dictionary<string, CustomAssetPackDataEntry> m_BundleNameToAssetPack;
+        [AutoStaticsCleanup]
         static PlayAssetDeliveryRuntimeData s_Instance = null;
 
         /// <summary>

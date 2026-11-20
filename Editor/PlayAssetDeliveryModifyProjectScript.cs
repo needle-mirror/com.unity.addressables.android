@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Unity.Scripting.LifecycleManagement;
 using UnityEditor.Android;
 using Unity.Android.Gradle;
 using UnityEngine;
@@ -179,8 +180,12 @@ namespace UnityEditor.AddressableAssets.Android
         internal static string SettingsTemplatePath => Path.Combine(PluginsAndroidPath, kSettingsTemplateName);
         internal static string LauncherGradleTemplatePath => Path.Combine(PluginsAndroidPath, kLauncherGradleTemplateName);
 
+        // Set by Reset() at the start of every build, so they don't need resetting on entering Play mode.
+        [NoAutoStaticsCleanup]
         internal static bool UpdateLauncherBuildGradle { get; private set; } = false;
+        [NoAutoStaticsCleanup]
         internal static bool UpdateSettingsGradle { get; private set; } = false;
+        [NoAutoStaticsCleanup]
         static CustomAssetPackData CustomPackData { get; set; } = null;
 
         internal const string kAssetPacksMissing = "Asset packs entry (**PLAY_ASSET_PACKS**) is missing from Custom Launcher Gradle Template. Asset packs are not included to the AAB.";

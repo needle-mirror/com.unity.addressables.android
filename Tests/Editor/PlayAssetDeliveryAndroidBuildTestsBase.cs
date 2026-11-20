@@ -21,6 +21,8 @@ internal class PlayAssetDeliveryAndroidBuildTestsBase : PlayAssetDeliveryBuildTe
         {
             Assert.Fail("BuildTarget should be set to Android to run these tests");
         }
+        PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
+        PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
         PlayerSettings.SetIl2CppCodeGeneration(UnityEditor.Build.NamedBuildTarget.Android, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
     }
 
